@@ -1,0 +1,94 @@
+import { NextRequest, NextResponse } from 'next/server'
+import connectDB from '@/lib/mongodb'
+import User from '@/lib/models/User'
+
+// POST /api/create-user - Create a new user
+export async function POST(request: NextRequest) {
+  try {
+    await connectDB()
+    
+    const body = await request.json()
+    const { address, slug, displayName, bio } = body
+    
+    // Validate required fields
+    if (!address || !slug) {
+      return NextResponse.json(
+        { error: 'Address and slug are required' },
+        { status: 400 }
+      )
+    }
+    
+    // Validate slug format
+    const slugRegex = /^[a-z0-9-]+$/
+    if (!slugRegex.test(slug) || slug.length < 3 || slug.length > 30) {
+      return NextResponse.json(
+        { error: 'Slug must be 3-30 characters, lowercase letters, numbers, and hyphens only' },
+        { status: 400 }
+      )
+    }
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      $or: [
+        { address: address.toLowerCase() },
+        { slug: slug.toLowerCase() }
+      ]
+    })
+    
+    if (existingUser) {
+      if (existingUser.address === address.toLowerCase()) {
+        return NextResponse.json(
+          { error: 'User with this address already exists' },
+          { status: 409 }
+        )
+      } else {
+        return NextResponse.json(
+          { error: 'This slug is already taken' },
+          { status: 409 }
+        )
+      }
+    }
+    
+    // Create new user
+    const newUser = new User({
+      address: address.toLowerCase(),
+      slug: slug.toLowerCase(),
+      displayName: displayName?.trim() || '',
+      bio: bio?.trim() || ''
+    })
+    
+    await newUser.save()
+    
+    return NextResponse.json(
+      { 
+        message: 'User created successfully',
+        user: {
+          id: newUser._id,
+          address: newUser.address,
+          slug: newUser.slug,
+          displayName: newUser.displayName,
+          bio: newUser.bio,
+          createdAt: newUser.createdAt
+        }
+      },
+      { status: 201 }
+    )
+    
+  } catch (error: any) {
+    console.error('Error creating user:', error)
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0]
+      return NextResponse.json(
+        { error: `This ${field} is already taken` },
+        { status: 409 }
+      )
+    }
+    
+    return NextResponse.json(
+      { error: 'Failed to create user' },
+      { status: 500 }
+    )
+  }
+} 

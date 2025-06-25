@@ -1,0 +1,236 @@
+"use client"
+
+import type React from "react"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { useAccount } from "wagmi"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Coffee, Copy, ExternalLink, LogOut, Settings, TrendingUp } from "lucide-react"
+import { useDynamicContext } from "@dynamic-labs/sdk-react-core"
+import { useToast } from "@/hooks/use-toast"
+
+interface User {
+  id: string
+  address: string
+  displayName: string
+  bio?: string
+  slug: string
+  createdAt: string
+}
+
+export default function DashboardPage() {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const { address, isConnected } = useAccount()
+  const { setShowAuthFlow } = useDynamicContext()
+  const router = useRouter()
+  const { toast } = useToast()
+
+  const fetchUser = async () => {
+    if (!address) return
+
+    try {
+      const response = await fetch(`/api/user/${address}`)
+      if (response.ok) {
+        const userData = await response.json()
+        setUser(userData)
+      } else {
+        router.push("/onboarding")
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error)
+      router.push("/")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!isConnected) {
+      router.push("/")
+      return
+    }
+
+    fetchUser()
+  }, [isConnected, address]) // Remove fetchUser and router from dependencies to prevent infinite loops
+
+  const copyLink = () => {
+    if (!user) return
+    const url = `${window.location.origin}/u/${user.slug}`
+    navigator.clipboard.writeText(url)
+    toast({
+      title: "Link copied!",
+      description: "Share this link to receive donations",
+    })
+  }
+
+  const handleLogout = () => {
+    setShowAuthFlow(false)
+    router.push("/")
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <Coffee className="h-12 w-12 text-purple-600 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      {/* Header */}
+      <header className="container mx-auto px-4 py-6 flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <Coffee className="h-8 w-8 text-purple-600" />
+          <span className="text-2xl font-bold text-gray-900">CryptoCoffee</span>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Button variant="outline" onClick={() => router.push(`/u/${user.slug}`)}>
+            <ExternalLink className="h-4 w-4 mr-2" />
+            View Page
+          </Button>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        </div>
+      </header>
+
+      {/* Dashboard Content */}
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {user.displayName}!</h1>
+            <p className="text-gray-600">Manage your crypto donation page and track your support.</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            {/* Page Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2" />
+                  Page Stats
+                </CardTitle>
+                <CardDescription>Your donation page performance</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Total Visits</span>
+                    <span className="font-semibold">Coming Soon</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">Total Donations</span>
+                    <span className="font-semibold">Coming Soon</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600">This Month</span>
+                    <span className="font-semibold">Coming Soon</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <Settings className="h-5 w-5 mr-2" />
+                  Quick Actions
+                </CardTitle>
+                <CardDescription>Manage your donation page</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button variant="outline" className="w-full justify-start" onClick={copyLink}>
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy Page Link
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => router.push(`/u/${user.slug}`)}
+                >
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  View Public Page
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => router.push("/onboarding")}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Page Info */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Your Donation Page</CardTitle>
+              <CardDescription>Share this information with your supporters</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Page URL</Label>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1">
+                      {window.location.origin}/u/{user.slug}
+                    </code>
+                    <Button size="sm" variant="outline" onClick={copyLink}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Wallet Address</Label>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1">
+                      {user.address.slice(0, 6)}...{user.address.slice(-4)}
+                    </code>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-gray-700">Display Name</Label>
+                <p className="mt-1 text-gray-900">{user.displayName}</p>
+              </div>
+
+              {user.bio && (
+                <div>
+                  <Label className="text-sm font-medium text-gray-700">Bio</Label>
+                  <p className="mt-1 text-gray-900">{user.bio}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function Label({ children, className }: { children: React.ReactNode; className?: string }) {
+  return <label className={className}>{children}</label>
+}

@@ -23,41 +23,51 @@ interface User {
 export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [mounted, setMounted] = useState(false)
   const { address, isConnected } = useAccount()
   const { setShowAuthFlow } = useDynamicContext()
   const router = useRouter()
   const { toast } = useToast()
 
-  const fetchUser = async () => {
-    if (!address) return
-
-    try {
-      const response = await fetch(`/api/user/${address}`)
-      if (response.ok) {
-        const userData = await response.json()
-        setUser(userData)
-      } else {
-        router.push("/onboarding")
-      }
-    } catch (error) {
-      console.error("Error fetching user:", error)
-      router.push("/")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
+    const fetchUser = async () => {
+      if (!address) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        const response = await fetch(`/api/user/${address}`)
+        if (response.ok) {
+          const userData = await response.json()
+          setUser(userData)
+        } else {
+          router.push("/onboarding")
+        }
+      } catch (error) {
+        console.error("Error fetching user:", error)
+        router.push("/")
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
     if (!isConnected) {
       router.push("/")
       return
     }
 
-    fetchUser()
-  }, [isConnected, address]) // Remove fetchUser and router from dependencies to prevent infinite loops
+    if (address) {
+      fetchUser()
+    }
+  }, [isConnected, address, router]) // Only depend on external values
 
   const copyLink = () => {
-    if (!user) return
+    if (!user || typeof window === 'undefined') return
     const url = `${window.location.origin}/u/${user.slug}`
     navigator.clipboard.writeText(url)
     toast({
@@ -188,7 +198,7 @@ export default function DashboardPage() {
                   <Label className="text-sm font-medium text-gray-700">Page URL</Label>
                   <div className="flex items-center space-x-2 mt-1">
                     <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1">
-                      {window.location.origin}/u/{user.slug}
+                      {mounted && typeof window !== 'undefined' ? `${window.location.origin}/u/${user.slug}` : `cryptocoffee.app/u/${user.slug}`}
                     </code>
                     <Button size="sm" variant="outline" onClick={copyLink}>
                       <Copy className="h-4 w-4" />
@@ -199,12 +209,13 @@ export default function DashboardPage() {
                   <Label className="text-sm font-medium text-gray-700">Wallet Address</Label>
                   <div className="flex items-center space-x-2 mt-1">
                     <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1">
-                      {user.address.slice(0, 6)}...{user.address.slice(-4)}
+                      {user.address ? `${user.address.slice(0, 6)}...${user.address.slice(-4)}` : 'Loading...'}
                     </code>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
+                      onClick={() => user.address && window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
+                      disabled={!user.address}
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>

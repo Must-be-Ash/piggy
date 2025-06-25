@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -46,6 +46,9 @@ import {
   blast
 } from "viem/chains"
 import { useToast } from "@/hooks/use-toast"
+import { useTokenDetection, type TokenWithBalance } from "@/lib/token-detection"
+import { getTokenPrice, calculateTokenAmount, calculateUsdValue, isStablecoin, getFallbackPrice } from "@/lib/price-service"
+import { getSmartPresets, formatPresetAmount, formatButtonAmount, calculateDisplayValue } from "@/lib/preset-amounts"
 
 // Expanded chain support with better UX
 const SUPPORTED_CHAINS = [
@@ -112,17 +115,17 @@ const COMMON_TOKENS: Record<number, Array<{ address: string; symbol: string; dec
   ],
 }
 
-// Preset amounts in USD equivalent
-const PRESET_AMOUNTS = [5, 10, 25, 50, 100, 250]
+// Smart presets are now handled by the preset-amounts service
 
 interface Token {
-  address?: string
+  address: string
   symbol: string
   decimals: number
   name: string
-  balance: bigint
-  formatted: string
+  balance: string
+  balanceFormatted: string
   isNative?: boolean
+  logo?: string
 }
 
 interface DonationRecipient {
@@ -147,33 +150,39 @@ export function EnhancedDonationModal({
   const [selectedToken, setSelectedToken] = useState<Token | null>(null)
   const [amount, setAmount] = useState("")
   const [customAmount, setCustomAmount] = useState("")
-  const [isLoadingTokens, setIsLoadingTokens] = useState(false)
-  const [availableTokens, setAvailableTokens] = useState<Token[]>([])
   const [txHash, setTxHash] = useState<string>("")
   const [error, setError] = useState<string>("")
+  const [tokenPrice, setTokenPrice] = useState<number>(0)
+  const [isLoadingPrice, setIsLoadingPrice] = useState(false)
 
   const { address, isConnected, chain } = useAccount()
   const { switchChain } = useSwitchChain()
   const { toast } = useToast()
 
-  // Native balance
+  // Get native balance for the selected chain
   const { data: nativeBalance } = useBalance({
     address,
     chainId: selectedChain,
   })
 
-  // ERC-20 token balances
-  const chainTokens = COMMON_TOKENS[selectedChain] || []
-  const { data: tokenBalances } = useReadContracts({
-    contracts: chainTokens.map((token) => ({
-      address: getAddress(token.address),
-      abi: erc20Abi,
-      functionName: "balanceOf",
-      args: [address!],
-      chainId: selectedChain,
-    })),
-    query: { enabled: !!address && chainTokens.length > 0 },
-  })
+  // Use our new dynamic token detection
+  const { 
+    tokens: detectedTokens, 
+    loading: isLoadingTokens, 
+    error: tokenError 
+  } = useTokenDetection(address || '', selectedChain)
+
+  // Debug logging
+  useEffect(() => {
+    console.log('🔍 Token Detection Debug:', {
+      address,
+      selectedChain,
+      detectedTokens: detectedTokens.length,
+      nativeBalance: nativeBalance?.formatted,
+      isLoadingTokens,
+      tokenError
+    })
+  }, [address, selectedChain, detectedTokens, nativeBalance, isLoadingTokens, tokenError])
 
   // Transaction hooks
   const { sendTransaction, isPending: isSendingNative } = useSendTransaction()
@@ -181,6 +190,55 @@ export function EnhancedDonationModal({
   const { isLoading: isConfirming } = useWaitForTransactionReceipt({
     hash: txHash as `0x${string}`,
   })
+
+  // Convert detected tokens and merge with native balance
+  const availableTokens: Token[] = useMemo(() => {
+    const tokens: Token[] = []
+    
+    // Add native token with real balance from wagmi
+    if (nativeBalance && nativeBalance.value > BigInt(0)) {
+      const currentChain = SUPPORTED_CHAINS.find((c) => c.id === selectedChain)
+      if (currentChain) {
+        tokens.push({
+          address: '0x0000000000000000000000000000000000000000',
+          symbol: currentChain.nativeCurrency.symbol,
+          decimals: currentChain.nativeCurrency.decimals,
+          name: currentChain.nativeCurrency.name,
+          balance: nativeBalance.value.toString(),
+          balanceFormatted: nativeBalance.formatted,
+          isNative: true,
+        })
+      }
+    }
+    
+    // Add detected ERC-20 tokens (excluding native tokens from Alchemy)
+    const erc20Tokens = detectedTokens
+      .filter(token => !token.isNative)
+      .map(token => ({
+        address: token.address,
+        symbol: token.symbol,
+        decimals: token.decimals,
+        name: token.name,
+        balance: token.balance,
+        balanceFormatted: token.balanceFormatted,
+        isNative: false,
+        logo: token.logo,
+      }))
+    
+    tokens.push(...erc20Tokens)
+    
+    // Sort: Native first, then by balance (high to low), then alphabetical
+    return tokens.sort((a, b) => {
+      if (a.isNative && !b.isNative) return -1
+      if (!a.isNative && b.isNative) return 1
+      
+      const aBalance = parseFloat(a.balanceFormatted) || 0
+      const bBalance = parseFloat(b.balanceFormatted) || 0
+      if (aBalance !== bBalance) return bBalance - aBalance
+      
+      return a.symbol.localeCompare(b.symbol)
+    })
+  }, [detectedTokens, nativeBalance, selectedChain])
 
   // Initialize step based on connection status
   useEffect(() => {
@@ -191,46 +249,12 @@ export function EnhancedDonationModal({
     }
   }, [isConnected])
 
-  // Load available tokens when chain changes
+  // Show token detection errors
   useEffect(() => {
-    if (!address || !isConnected) return
-
-    setIsLoadingTokens(true)
-    const tokens: Token[] = []
-
-    // Add native token
-    if (nativeBalance) {
-      const currentChain = SUPPORTED_CHAINS.find((c) => c.id === selectedChain)
-      if (currentChain) {
-        tokens.push({
-          symbol: currentChain.nativeCurrency.symbol,
-          decimals: currentChain.nativeCurrency.decimals,
-          name: currentChain.nativeCurrency.name,
-          balance: nativeBalance.value,
-          formatted: formatUnits(nativeBalance.value, currentChain.nativeCurrency.decimals),
-          isNative: true,
-        })
-      }
+    if (tokenError) {
+      console.warn('Token detection error:', tokenError)
     }
-
-    // Add ERC-20 tokens with balance > 0
-    if (tokenBalances) {
-      chainTokens.forEach((token, index) => {
-        const balanceResult = tokenBalances[index]?.result
-        const balance = balanceResult ? BigInt(balanceResult.toString()) : BigInt(0)
-        if (balance > BigInt(0)) {
-          tokens.push({
-            ...token,
-            balance,
-            formatted: formatUnits(balance, token.decimals),
-          })
-        }
-      })
-    }
-
-    setAvailableTokens(tokens)
-    setIsLoadingTokens(false)
-  }, [address, selectedChain, nativeBalance, tokenBalances, chainTokens, isConnected])
+  }, [tokenError])
 
   const handleChainSelect = async (chainId: number) => {
     setSelectedChain(chainId)
@@ -249,8 +273,31 @@ export function EnhancedDonationModal({
     setStep("select-token")
   }
 
-  const handleTokenSelect = (token: Token) => {
+  const handleTokenSelect = async (token: Token) => {
     setSelectedToken(token)
+    setIsLoadingPrice(true)
+    setTokenPrice(0)
+    
+    try {
+      // Fetch real-time price for the token
+      const price = await getTokenPrice(
+        token.symbol, 
+        token.address !== '0x0000000000000000000000000000000000000000' ? token.address : undefined,
+        selectedChain
+      )
+      
+      // If price fetch fails, use fallback for stablecoins
+      const finalPrice = price > 0 ? price : getFallbackPrice(token.symbol)
+      setTokenPrice(finalPrice)
+      
+      console.log(`💰 Price set for ${token.symbol}: $${finalPrice}`)
+    } catch (error) {
+      console.error('Failed to fetch token price:', error)
+      setTokenPrice(getFallbackPrice(token.symbol))
+    } finally {
+      setIsLoadingPrice(false)
+    }
+    
     setStep("amount")
   }
 
@@ -274,7 +321,7 @@ export function EnhancedDonationModal({
   const validateFunds = (amountToSend: number): boolean => {
     if (!selectedToken) return false
     
-    const availableBalance = Number.parseFloat(selectedToken.formatted)
+    const availableBalance = Number.parseFloat(selectedToken.balanceFormatted)
     if (amountToSend > availableBalance) {
       setError(`Insufficient balance. You have ${availableBalance.toFixed(6)} ${selectedToken.symbol} available.`)
       return false
@@ -411,15 +458,26 @@ export function EnhancedDonationModal({
                 <h2 className="text-2xl font-bold text-[#1a202c] mb-2">
                   Support {recipient.displayName}
                 </h2>
-                <p className="text-[#718096] mb-2 text-sm">
-                  Connect your wallet to get started
-                </p>
+  
                 <p className="text-[#718096] mb-8">
                   Connect your wallet to start supporting {recipient.displayName} with crypto donations
                 </p>
                 
                 <div className="space-y-4">
-                  <DynamicWidget />
+                  {/* Centered wallet widget container */}
+                  <div className="flex justify-center">
+                    <DynamicWidget />
+                  </div>
+                  
+                  {/* Continue button for already connected users */}
+                  {isConnected && (
+                    <Button
+                      onClick={() => setStep("select-chain")}
+                      className="w-full bg-gradient-to-r from-[#2d3748] to-[#4a5568] hover:from-[#1a202c] hover:to-[#2d3748] text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      Continue to Donate
+                    </Button>
+                  )}
                   
                   <div className="grid grid-cols-3 gap-4 mt-8">
                     <div className="text-center">
@@ -572,7 +630,7 @@ export function EnhancedDonationModal({
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-[#1a202c]">
-                            {parseFloat(token.formatted).toFixed(6)}
+                            {parseFloat(token.balanceFormatted).toFixed(6)}
                           </p>
                           <p className="text-sm text-[#718096]">Available</p>
                         </div>
@@ -618,37 +676,69 @@ export function EnhancedDonationModal({
 
                 {/* Preset amounts */}
                 <div className="space-y-4 mb-6">
-                  <p className="text-sm font-semibold text-[#4a5568] mb-3">Quick amounts (USD equivalent):</p>
-                  <div className="grid grid-cols-3 gap-3">
-                    {PRESET_AMOUNTS.map((preset) => {
-                      const presetAmount = Number.parseFloat(preset.toString())
-                      const availableBalance = Number.parseFloat(selectedToken.formatted)
-                      const hasEnoughFunds = presetAmount <= availableBalance
-                      
-                      return (
-                        <button
-                          key={preset}
-                          onClick={() => handleAmountSelect(preset.toString())}
-                          disabled={!hasEnoughFunds}
-                          className={`p-4 rounded-xl transition-colors duration-200 text-center group ${
-                            hasEnoughFunds 
-                              ? "bg-[#f7fafc] hover:bg-[#edf2f7] cursor-pointer" 
-                              : "bg-gray-100 cursor-not-allowed opacity-50"
-                          }`}
-                        >
-                          <p className={`font-bold text-lg ${hasEnoughFunds ? "text-[#1a202c]" : "text-gray-400"}`}>
-                            ${preset}
-                          </p>
-                          <p className={`text-xs ${hasEnoughFunds ? "text-[#718096]" : "text-gray-400"}`}>
-                            ≈ {preset} {selectedToken.symbol}
-                          </p>
-                          {!hasEnoughFunds && (
-                            <p className="text-xs text-red-500 mt-1">Insufficient</p>
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
+                  {isLoadingPrice ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mr-2 text-[#4a5568]" />
+                      <span className="text-sm text-[#718096]">Getting current prices...</span>
+                    </div>
+                  ) : (() => {
+                    const smartPresets = getSmartPresets(selectedToken, tokenPrice);
+                    
+                    return (
+                      <>
+                        <p className="text-sm font-semibold text-[#4a5568] mb-3">
+                          Quick amounts ({smartPresets.label}):
+                        </p>
+                        <div className="grid grid-cols-3 gap-3">
+                          {smartPresets.amounts.map((preset, index) => {
+                            const availableBalance = Number.parseFloat(selectedToken.balanceFormatted);
+                            let finalAmount: string;
+                            let displayValue: string | null;
+                            
+                            if (smartPresets.type === 'usd') {
+                              // USD-based preset: convert to token amount
+                              finalAmount = tokenPrice > 0 ? calculateTokenAmount(preset, tokenPrice) : "0";
+                              displayValue = `$${preset}`;
+                            } else {
+                              // Token-based preset: use amount directly
+                              finalAmount = preset.toString();
+                              displayValue = calculateDisplayValue(preset, tokenPrice, 'token');
+                            }
+                            
+                            const finalAmountNum = Number.parseFloat(finalAmount);
+                            const hasEnoughFunds = finalAmountNum <= availableBalance && finalAmountNum > 0;
+                            
+                            return (
+                              <button
+                                key={`${preset}-${index}`}
+                                onClick={() => handleAmountSelect(finalAmount)}
+                                disabled={!hasEnoughFunds}
+                                className={`p-4 rounded-xl transition-colors duration-200 text-center group ${
+                                  hasEnoughFunds 
+                                    ? "bg-[#f7fafc] hover:bg-[#edf2f7] cursor-pointer" 
+                                    : "bg-gray-100 cursor-not-allowed opacity-50"
+                                }`}
+                              >
+                                <p className={`font-bold text-lg ${hasEnoughFunds ? "text-[#1a202c]" : "text-gray-400"}`}>
+                                  {smartPresets.type === 'usd' ? `$${preset}` : formatButtonAmount(preset)}
+                                </p>
+                                <p className={`text-xs ${hasEnoughFunds ? "text-[#718096]" : "text-gray-400"}`}>
+                                  {smartPresets.type === 'usd' ? (
+                                    <>≈ {formatButtonAmount(Number.parseFloat(finalAmount))} {selectedToken.symbol}</>
+                                  ) : (
+                                    <>{displayValue || `${formatButtonAmount(preset)} ${selectedToken.symbol}`}</>
+                                  )}
+                                </p>
+                                {!hasEnoughFunds && (
+                                  <p className="text-xs text-red-500 mt-1">Insufficient</p>
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* Custom amount */}
@@ -678,11 +768,18 @@ export function EnhancedDonationModal({
                       </div>
                     </div>
                     <div className="flex justify-between items-center mt-2">
-                      <p className="text-xs text-[#718096]">
-                        Available: {parseFloat(selectedToken.formatted).toFixed(6)} {selectedToken.symbol}
-                      </p>
+                      <div className="flex flex-col">
+                        <p className="text-xs text-[#718096]">
+                          Available: {parseFloat(selectedToken.balanceFormatted).toFixed(6)} {selectedToken.symbol}
+                        </p>
+                        {customAmount && tokenPrice > 0 && (
+                          <p className="text-xs text-[#4a5568] font-semibold">
+                            ≈ ${(Number.parseFloat(customAmount) * tokenPrice).toFixed(2)} USD
+                          </p>
+                        )}
+                      </div>
                       <button
-                        onClick={() => setCustomAmount(selectedToken.formatted)}
+                        onClick={() => setCustomAmount(selectedToken.balanceFormatted)}
                         className="text-xs text-[#2d3748] hover:text-[#1a202c] font-semibold"
                       >
                         Use Max
@@ -763,7 +860,14 @@ export function EnhancedDonationModal({
                   <div className="border-t border-white pt-4">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[#718096]">Amount:</span>
-                      <span className="font-bold text-[#1a202c] text-lg">{amount} {selectedToken.symbol}</span>
+                      <div className="text-right">
+                        <span className="font-bold text-[#1a202c] text-lg">{amount} {selectedToken.symbol}</span>
+                        {tokenPrice > 0 && (
+                          <p className="text-xs text-[#718096]">
+                            ≈ ${(Number.parseFloat(amount) * tokenPrice).toFixed(2)} USD
+                          </p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[#718096]">Network:</span>

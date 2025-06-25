@@ -397,6 +397,7 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         walletConnectors: [EthereumWalletConnectors],
         initialAuthenticationMode: "connect-only",
         shadowDOMEnabled: true,
+        networkValidationMode: "never", // Allow any network
         events: {
           onAuthSuccess: (args) => {
             console.log("Auth success:", args)

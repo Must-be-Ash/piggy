@@ -102,21 +102,20 @@
   - [x] Updated `app/page.tsx` to use Header and AuthModal
   - [x] Updated `app/onboarding/page.tsx` to use Header and AuthModal with improved UX
 
-### Phase 3: Token Discovery Enhancement
-- [ ] Create `lib/tokens.ts` with `COMMON_TOKENS` mapping per chain
-- [ ] Implement batch token balance checking with `useReadContracts`
-- [ ] Add token metadata fetching (name, symbol, decimals, logo)
-- [ ] Add fallback for custom token address input
-- [ ] Implement token search and filtering
+### Phase 3: Token Discovery Enhancement ✅ COMPLETED
+- [x] Create `lib/token-detection.ts` with comprehensive token detection
+- [x] Implement Alchemy API integration for ALL token detection
+- [x] Add token metadata fetching (name, symbol, decimals, logo)
+- [x] Add support for unknown/custom tokens (like Poopcoin, Pog Coin)
+- [x] Implement automatic token discovery for all supported chains
 
-### Phase 4: Token List Integration
-- [ ] Research and integrate standard token lists (e.g., Uniswap, 1inch)
-- [ ] Implement token list fetching and caching
-- [ ] Add token logo support from token lists
-- [ ] Implement fallback token metadata fetching
-- [ ] Implement TokenList protocol for token discovery
-- [ ] Add custom token list support
-- [ ] Cache token lists for performance
+### Phase 4: Token List Integration ✅ COMPLETED
+- [x] Research and integrate standard token lists (Uniswap, 1inch, etc.)
+- [x] Implement token list fetching and caching
+- [x] Add token logo support from token lists
+- [x] Implement fallback token metadata fetching
+- [x] Implement comprehensive token discovery system
+- [x] Add multi-source token detection (Alchemy + Token Lists)
 
 ### Phase 5: ENS Resolution
 - [ ] Add ENS resolution for wallet addresses

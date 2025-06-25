@@ -36,20 +36,29 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchUser = async () => {
       if (!address) {
+        console.log("Dashboard: No address available")
         setIsLoading(false)
         return
       }
 
+      console.log("Dashboard: Fetching user for address:", address)
       try {
         const response = await fetch(`/api/user/${address}`)
+        console.log("Dashboard: API response status:", response.status)
+        
         if (response.ok) {
-          const userData = await response.json()
+          const data = await response.json()
+          console.log("Dashboard: API response data:", data)
+          // Extract user from the response since API returns { user: userData }
+          const userData = data.user || data
+          console.log("Dashboard: User data extracted:", userData)
           setUser(userData)
         } else {
+          console.log("Dashboard: User not found, redirecting to onboarding")
           router.push("/onboarding")
         }
       } catch (error) {
-        console.error("Error fetching user:", error)
+        console.error("Dashboard: Error fetching user:", error)
         router.push("/")
       } finally {
         setIsLoading(false)
@@ -57,6 +66,7 @@ export default function DashboardPage() {
     }
 
     if (!isConnected) {
+      console.log("Dashboard: User not connected, redirecting to home")
       router.push("/")
       return
     }
@@ -67,8 +77,12 @@ export default function DashboardPage() {
   }, [isConnected, address, router]) // Only depend on external values
 
   const copyLink = () => {
-    if (!user || typeof window === 'undefined') return
+    if (!user?.slug || typeof window === 'undefined') {
+      console.log("Copy link failed - user slug:", user?.slug)
+      return
+    }
     const url = `${window.location.origin}/u/${user.slug}`
+    console.log("Copying URL:", url)
     navigator.clipboard.writeText(url)
     toast({
       title: "Link copied!",
@@ -124,67 +138,45 @@ export default function DashboardPage() {
             <p className="text-gray-600">Manage your crypto donation page and track your support.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            {/* Page Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <TrendingUp className="h-5 w-5 mr-2" />
-                  Page Stats
-                </CardTitle>
-                <CardDescription>Your donation page performance</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Total Visits</span>
-                    <span className="font-semibold">Coming Soon</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Total Donations</span>
-                    <span className="font-semibold">Coming Soon</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">This Month</span>
-                    <span className="font-semibold">Coming Soon</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Settings className="h-5 w-5 mr-2" />
-                  Quick Actions
-                </CardTitle>
-                <CardDescription>Manage your donation page</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start" onClick={copyLink}>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy Page Link
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => router.push(`/u/${user.slug}`)}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  View Public Page
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full justify-start"
-                  onClick={() => router.push("/onboarding")}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Quick Actions */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Settings className="h-5 w-5 mr-2" />
+                Quick Actions
+              </CardTitle>
+              <CardDescription>Manage your donation page</CardDescription>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-3 gap-3">
+              <Button variant="outline" className="w-full justify-start" onClick={copyLink}>
+                <Copy className="h-4 w-4 mr-2" />
+                Copy Page Link
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => {
+                  console.log("View Public Page clicked, user slug:", user?.slug)
+                  if (user?.slug) {
+                    router.push(`/u/${user.slug}`)
+                  } else {
+                    console.error("User slug is undefined:", user)
+                  }
+                }}
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                View Public Page
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => router.push("/onboarding")}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+            </CardContent>
+          </Card>
 
           {/* Page Info */}
           <Card>
@@ -198,9 +190,14 @@ export default function DashboardPage() {
                   <Label className="text-sm font-medium text-gray-700">Page URL</Label>
                   <div className="flex items-center space-x-2 mt-1">
                     <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1">
-                      {mounted && typeof window !== 'undefined' ? `${window.location.origin}/u/${user.slug}` : `cryptocoffee.app/u/${user.slug}`}
+                      {user?.slug 
+                        ? (mounted && typeof window !== 'undefined' 
+                            ? `${window.location.origin}/u/${user.slug}` 
+                            : `cryptocoffee.app/u/${user.slug}`)
+                        : 'Loading...'
+                      }
                     </code>
-                    <Button size="sm" variant="outline" onClick={copyLink}>
+                    <Button size="sm" variant="outline" onClick={copyLink} disabled={!user?.slug}>
                       <Copy className="h-4 w-4" />
                     </Button>
                   </div>
@@ -209,13 +206,13 @@ export default function DashboardPage() {
                   <Label className="text-sm font-medium text-gray-700">Wallet Address</Label>
                   <div className="flex items-center space-x-2 mt-1">
                     <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1">
-                      {user.address ? `${user.address.slice(0, 6)}...${user.address.slice(-4)}` : 'Loading...'}
+                      {user?.address ? `${user.address.slice(0, 6)}...${user.address.slice(-4)}` : 'Loading...'}
                     </code>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => user.address && window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
-                      disabled={!user.address}
+                      onClick={() => user?.address && window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
+                      disabled={!user?.address}
                     >
                       <ExternalLink className="h-4 w-4" />
                     </Button>
@@ -225,10 +222,10 @@ export default function DashboardPage() {
 
               <div>
                 <Label className="text-sm font-medium text-gray-700">Display Name</Label>
-                <p className="mt-1 text-gray-900">{user.displayName}</p>
+                <p className="mt-1 text-gray-900">{user?.displayName || 'Loading...'}</p>
               </div>
 
-              {user.bio && (
+              {user?.bio && (
                 <div>
                   <Label className="text-sm font-medium text-gray-700">Bio</Label>
                   <p className="mt-1 text-gray-900">{user.bio}</p>

@@ -7,9 +7,10 @@ import { useRouter } from "next/navigation"
 import { useAccount } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Coffee, Copy, ExternalLink, LogOut, Settings, TrendingUp } from "lucide-react"
+import { Coffee, Copy, ExternalLink, LogOut, Settings, TrendingUp, Check } from "lucide-react"
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core"
 import { useToast } from "@/hooks/use-toast"
+import { TextShimmer } from "@/components/ui/text-shimmer"
 
 interface User {
   id: string
@@ -24,6 +25,8 @@ export default function DashboardPage() {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
+  const [connectionChecked, setConnectionChecked] = useState(false)
   const { address, isConnected } = useAccount()
   const { setShowAuthFlow } = useDynamicContext()
   const router = useRouter()
@@ -31,30 +34,29 @@ export default function DashboardPage() {
 
   useEffect(() => {
     setMounted(true)
+    // Give time for wallet connection to be restored
+    const timer = setTimeout(() => {
+      setConnectionChecked(true)
+    }, 1000)
+    return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
     const fetchUser = async () => {
       if (!address) {
-        console.log("Dashboard: No address available")
         setIsLoading(false)
         return
       }
 
-      console.log("Dashboard: Fetching user for address:", address)
       try {
         const response = await fetch(`/api/user/${address}`)
-        console.log("Dashboard: API response status:", response.status)
         
         if (response.ok) {
           const data = await response.json()
-          console.log("Dashboard: API response data:", data)
           // Extract user from the response since API returns { user: userData }
           const userData = data.user || data
-          console.log("Dashboard: User data extracted:", userData)
           setUser(userData)
         } else {
-          console.log("Dashboard: User not found, redirecting to onboarding")
           router.push("/onboarding")
         }
       } catch (error) {
@@ -65,29 +67,49 @@ export default function DashboardPage() {
       }
     }
 
+    // Only check connection after initial mount and connection check delay
+    if (!connectionChecked) {
+      return
+    }
+
     if (!isConnected) {
-      console.log("Dashboard: User not connected, redirecting to home")
       router.push("/")
       return
     }
 
     if (address) {
       fetchUser()
+    } else {
+      setIsLoading(false)
     }
-  }, [isConnected, address, router]) // Only depend on external values
+  }, [isConnected, address, router, connectionChecked]) // Added connectionChecked dependency
 
-  const copyLink = () => {
+  const copyLink = async () => {
     if (!user?.slug || typeof window === 'undefined') {
-      console.log("Copy link failed - user slug:", user?.slug)
       return
     }
     const url = `${window.location.origin}/u/${user.slug}`
-    console.log("Copying URL:", url)
-    navigator.clipboard.writeText(url)
-    toast({
-      title: "Link copied!",
-      description: "Share this link to receive donations",
-    })
+    
+    try {
+      await navigator.clipboard.writeText(url)
+      setIsCopied(true)
+      toast({
+        title: "Link copied!",
+        description: "Share this link to receive donations",
+      })
+      
+      // Reset the checkmark after 1 second
+      setTimeout(() => {
+        setIsCopied(false)
+      }, 1000)
+    } catch (error) {
+      console.error('Failed to copy:', error)
+      toast({
+        title: "Copy failed",
+        description: "Please try again",
+        variant: "destructive"
+      })
+    }
   }
 
   const handleLogout = () => {
@@ -97,10 +119,86 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <Coffee className="h-12 w-12 text-purple-600 mx-auto mb-4 animate-pulse" />
-          <p className="text-gray-600">Loading your dashboard...</p>
+      <div className="min-h-screen bg-[#fafbfc] flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-4">
+          {/* Main loading icon with enhanced animations */}
+          <div className="relative mb-8">
+            {/* Outer ring */}
+            <div className="absolute inset-0 w-24 h-24 mx-auto">
+              <div className="w-full h-full border-4 border-[#e2e8f0] rounded-full"></div>
+              <div className="absolute inset-0 w-full h-full border-4 border-transparent border-t-[#2d3748] rounded-full animate-spin"></div>
+            </div>
+            
+            {/* Middle glow effect */}
+            <div className="absolute inset-2 bg-gradient-to-br from-[#2d3748]/20 to-[#4a5568]/20 rounded-2xl blur-lg animate-pulse"></div>
+            
+            {/* Inner container */}
+            <div className="relative w-24 h-24 mx-auto bg-white border border-[#e2e8f0] rounded-2xl shadow-lg flex items-center justify-center">
+              <div className="relative">
+                <Coffee className="h-8 w-8 text-[#2d3748] animate-bounce" style={{ animationDuration: '1.5s' }} />
+                {/* Steam effect */}
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
+                  <div className="w-0.5 h-2 bg-[#718096] rounded-full opacity-40 animate-pulse"></div>
+                </div>
+                                 <div className="absolute -top-1 left-1/3 transform">
+                   <div className="w-0.5 h-1.5 bg-[#718096] rounded-full opacity-30 animate-pulse" style={{ animationDelay: '0.3s' }}></div>
+                 </div>
+                 <div className="absolute -top-1 right-1/3 transform">
+                   <div className="w-0.5 h-1.5 bg-[#718096] rounded-full opacity-30 animate-pulse" style={{ animationDelay: '0.6s' }}></div>
+                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading text with improved typography */}
+          <div className="space-y-4 mb-8">
+            <h3 className="text-2xl font-bold text-[#1a202c] tracking-tight">Loading Dashboard</h3>
+            <p className="text-[#718096] leading-relaxed">Preparing your personalized crypto donation hub...</p>
+          </div>
+
+          {/* Progress indicator */}
+          <div className="space-y-3">
+            <div className="flex justify-center">
+              <div className="w-48 h-2 bg-[#e2e8f0] rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-[#2d3748] to-[#4a5568] rounded-full animate-pulse" style={{ width: '60%' }}></div>
+              </div>
+            </div>
+            <p className="text-xs text-[#a0aec0] font-medium">Setting up your workspace...</p>
+          </div>
+
+          {/* Skeleton cards preview */}
+          <div className="mt-12 space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-white border border-[#e2e8f0] rounded-xl p-4 animate-pulse">
+                  <div className="w-8 h-8 bg-[#f1f5f9] rounded-lg mb-3"></div>
+                  <div className="space-y-2">
+                    <div className="h-2 bg-[#f1f5f9] rounded w-3/4"></div>
+                    <div className="h-2 bg-[#f1f5f9] rounded w-1/2"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="bg-white border border-[#e2e8f0] rounded-xl p-6 animate-pulse">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="h-4 bg-[#f1f5f9] rounded w-1/3"></div>
+                  <div className="h-3 bg-[#f1f5f9] rounded w-16"></div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="h-3 bg-[#f1f5f9] rounded w-1/4"></div>
+                    <div className="h-8 bg-[#f1f5f9] rounded"></div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="h-3 bg-[#f1f5f9] rounded w-1/3"></div>
+                    <div className="h-8 bg-[#f1f5f9] rounded"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     )
@@ -111,128 +209,261 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+    <div className="min-h-screen bg-[#fafbfc]">
       {/* Header */}
-      <header className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <Coffee className="h-8 w-8 text-purple-600" />
-          <span className="text-2xl font-bold text-gray-900">CryptoCoffee</span>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={() => router.push(`/u/${user.slug}`)}>
-            <ExternalLink className="h-4 w-4 mr-2" />
-            View Page
-          </Button>
-          <Button variant="outline" onClick={handleLogout}>
-            <LogOut className="h-4 w-4 mr-2" />
-            Logout
-          </Button>
+      <header className="bg-white/85 backdrop-blur-xl border-b border-[#e1e5e9] sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={() => router.push("/")}
+              className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1 hover:opacity-80 transition-opacity duration-200"
+            >
+              <div className="relative shrink-0">
+                <div className="absolute inset-0 bg-[#2d3748] rounded-xl blur-sm opacity-20"></div>
+                <div className="relative p-2.5 sm:p-3 bg-[#2d3748] rounded-xl">
+                  <Coffee className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </div>
+              </div>
+              <div className="min-w-0 text-left">
+                <h1 className="text-lg sm:text-xl font-bold text-[#1a202c] tracking-tight truncate">CryptoCoffee</h1>
+                <p className="text-xs text-[#718096] font-medium hidden sm:block">Dashboard</p>
+              </div>
+            </button>
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-[#4a5568] hover:text-[#2d3748] hover:bg-[#f7fafc] transition-all duration-200 px-2 sm:px-3"
+                onClick={() => user?.slug && router.push(`/u/${user.slug}`)}
+                disabled={!user?.slug}
+              >
+                <ExternalLink className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">View Page</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="text-[#4a5568] hover:text-[#e53e3e] hover:bg-[#fed7d7] transition-all duration-200 px-2 sm:px-3"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">Logout</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Dashboard Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="mb-8 sm:mb-12">
+          <div className="relative mb-3 sm:mb-4">
+            <TextShimmer 
+              as="h1"
+              duration={3}
+              spread={1}
+              className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight [--base-color:theme(colors.gray.600)] [--base-gradient-color:theme(colors.black)] dark:[--base-color:theme(colors.gray.400)] dark:[--base-gradient-color:theme(colors.white)]"
+            >
+              {`Welcome back, ${user?.displayName || 'User'}`}
+            </TextShimmer>
+            <div className="absolute -bottom-1 left-0 w-16 sm:w-24 h-0.5 bg-gradient-to-r from-[#2d3748] to-transparent"></div>
+          </div>
+          <p className="text-[#718096] text-base sm:text-lg font-medium max-w-full sm:max-w-2xl leading-relaxed">
+            Your personalized crypto donation hub is ready to receive support from your community.
+          </p>
+        </div>
+
+        {/* Main Actions Grid */}
+        <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-8 sm:mb-12">
+          {/* Mobile simplified buttons */}
+          <button 
+            className="sm:hidden group relative p-4 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center"
+            onClick={copyLink}
+            disabled={!user?.slug}
+          >
+            <div className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2 transition-colors duration-300 ${
+              isCopied ? 'bg-green-100' : 'bg-[#f7fafc]'
+            }`}>
+              {isCopied ? (
+                <Check className="h-4 w-4 text-green-600" />
+              ) : (
+                <Copy className="h-4 w-4 text-[#4a5568]" />
+              )}
+            </div>
+            <span className="text-xs font-medium text-[#1a202c] block">
+              {isCopied ? 'Copied!' : 'Share'}
+            </span>
+          </button>
+
+          <button
+            className="sm:hidden group relative p-4 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center"
+            onClick={() => {
+              if (user?.slug) {
+                router.push(`/u/${user.slug}`)
+              }
+            }}
+            disabled={!user?.slug}
+          >
+            <div className="w-10 h-10 bg-[#f7fafc] rounded-lg flex items-center justify-center mx-auto mb-2">
+              <ExternalLink className="h-4 w-4 text-[#4a5568]" />
+            </div>
+            <span className="text-xs font-medium text-[#1a202c] block">Preview</span>
+          </button>
+
+          <button
+            className="sm:hidden group relative p-4 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center"
+            onClick={() => router.push("/onboarding")}
+          >
+            <div className="w-10 h-10 bg-[#f7fafc] rounded-lg flex items-center justify-center mx-auto mb-2">
+              <Settings className="h-4 w-4 text-[#4a5568]" />
+            </div>
+            <span className="text-xs font-medium text-[#1a202c] block">Edit</span>
+          </button>
+
+          {/* Desktop detailed cards */}
+          <button 
+            className="hidden sm:block group relative p-8 bg-white border border-[#e2e8f0] rounded-2xl hover:border-[#a0aec0] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left w-full"
+            onClick={copyLink}
+            disabled={!user?.slug}
+          >
+            <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <div className="w-2 h-2 bg-[#2d3748] rounded-full animate-pulse"></div>
+            </div>
+            <div className="mb-4">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-all duration-300 ${
+                isCopied 
+                  ? 'bg-green-100 group-hover:bg-green-200' 
+                  : 'bg-[#f7fafc] group-hover:bg-[#2d3748]'
+              }`}>
+                {isCopied ? (
+                  <Check className="h-5 w-5 text-green-600 group-hover:text-green-700 transition-colors duration-300" />
+                ) : (
+                  <Copy className="h-5 w-5 text-[#4a5568] group-hover:text-white transition-colors duration-300" />
+                )}
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-[#1a202c] mb-2 group-hover:text-[#2d3748] transition-colors duration-300">
+              {isCopied ? 'Link Copied!' : 'Share Your Page'}
+            </h3>
+            <p className="text-[#718096] text-sm leading-relaxed group-hover:text-[#4a5568] transition-colors duration-300">
+              {isCopied 
+                ? 'Your donation link is ready to share with supporters' 
+                : 'Copy your personalized donation link to share with supporters'
+              }
+            </p>
+          </button>
+
+          <button
+            className="hidden sm:block group relative p-8 bg-white border border-[#e2e8f0] rounded-2xl hover:border-[#a0aec0] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left w-full lg:col-span-1"
+            onClick={() => {
+              if (user?.slug) {
+                router.push(`/u/${user.slug}`)
+              }
+            }}
+            disabled={!user?.slug}
+          >
+            <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <div className="w-2 h-2 bg-[#2d3748] rounded-full animate-pulse"></div>
+            </div>
+            <div className="mb-4">
+              <div className="w-12 h-12 bg-[#f7fafc] rounded-xl flex items-center justify-center group-hover:bg-[#2d3748] group-hover:scale-110 transition-all duration-300">
+                <ExternalLink className="h-5 w-5 text-[#4a5568] group-hover:text-white transition-colors duration-300" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-[#1a202c] mb-2 group-hover:text-[#2d3748] transition-colors duration-300">Preview Page</h3>
+            <p className="text-[#718096] text-sm leading-relaxed group-hover:text-[#4a5568] transition-colors duration-300">See how your donation page appears to visitors</p>
+          </button>
+
+          <button
+            className="hidden sm:block group relative p-8 bg-white border border-[#e2e8f0] rounded-2xl hover:border-[#a0aec0] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-left w-full sm:col-span-2 lg:col-span-1"
+            onClick={() => router.push("/onboarding")}
+          >
+            <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-all duration-300">
+              <div className="w-2 h-2 bg-[#2d3748] rounded-full animate-pulse"></div>
+            </div>
+            <div className="mb-4">
+              <div className="w-12 h-12 bg-[#f7fafc] rounded-xl flex items-center justify-center group-hover:bg-[#2d3748] group-hover:scale-110 transition-all duration-300">
+                <Settings className="h-5 w-5 text-[#4a5568] group-hover:text-white transition-colors duration-300" />
+              </div>
+            </div>
+            <h3 className="text-lg font-semibold text-[#1a202c] mb-2 group-hover:text-[#2d3748] transition-colors duration-300">Edit Profile</h3>
+            <p className="text-[#718096] text-sm leading-relaxed group-hover:text-[#4a5568] transition-colors duration-300">Update your display name, bio, and page settings</p>
+          </button>
+        </div>
+
+        {/* Profile Information */}
+        <div className="bg-white border border-[#e2e8f0] rounded-2xl p-8 shadow-sm">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {user.displayName}!</h1>
-            <p className="text-gray-600">Manage your crypto donation page and track your support.</p>
+            <h2 className="text-2xl font-bold text-[#1a202c] mb-2">Profile Overview</h2>
+            <p className="text-[#718096]">Your donation page details and sharing information</p>
           </div>
 
-          {/* Quick Actions */}
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Settings className="h-5 w-5 mr-2" />
-                Quick Actions
-              </CardTitle>
-              <CardDescription>Manage your donation page</CardDescription>
-            </CardHeader>
-            <CardContent className="grid md:grid-cols-3 gap-3">
-              <Button variant="outline" className="w-full justify-start" onClick={copyLink}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy Page Link
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => {
-                  console.log("View Public Page clicked, user slug:", user?.slug)
-                  if (user?.slug) {
-                    router.push(`/u/${user.slug}`)
-                  } else {
-                    console.error("User slug is undefined:", user)
-                  }
-                }}
-              >
-                <ExternalLink className="h-4 w-4 mr-2" />
-                View Public Page
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full justify-start"
-                onClick={() => router.push("/onboarding")}
-              >
-                <Settings className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Page Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Donation Page</CardTitle>
-              <CardDescription>Share this information with your supporters</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Page URL</Label>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1">
-                      {user?.slug 
-                        ? (mounted && typeof window !== 'undefined' 
-                            ? `${window.location.origin}/u/${user.slug}` 
-                            : `cryptocoffee.app/u/${user.slug}`)
-                        : 'Loading...'
-                      }
-                    </code>
-                    <Button size="sm" variant="outline" onClick={copyLink} disabled={!user?.slug}>
-                      <Copy className="h-4 w-4" />
-                    </Button>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-[#4a5568] mb-3 uppercase tracking-wide">Page URL</label>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-[#f8fafc] border border-[#e2e8f0] px-4 py-3 rounded-xl text-sm font-mono text-[#1a202c] break-all">
+                    {user?.slug 
+                      ? (mounted && typeof window !== 'undefined' 
+                          ? `${window.location.origin}/u/${user.slug}` 
+                          : `cryptocoffee.app/u/${user.slug}`)
+                      : 'Loading...'
+                    }
                   </div>
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-gray-700">Wallet Address</Label>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <code className="bg-gray-100 px-3 py-2 rounded text-sm flex-1">
-                      {user?.address ? `${user.address.slice(0, 6)}...${user.address.slice(-4)}` : 'Loading...'}
-                    </code>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => user?.address && window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
-                      disabled={!user?.address}
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <button 
+                    className={`p-3 border border-[#e2e8f0] rounded-xl transition-colors duration-200 shrink-0 ${
+                      isCopied 
+                        ? 'bg-green-100 hover:bg-green-200' 
+                        : 'bg-[#f7fafc] hover:bg-[#edf2f7]'
+                    }`}
+                    onClick={copyLink} 
+                    disabled={!user?.slug}
+                  >
+                    {isCopied ? (
+                      <Check className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <Copy className="h-4 w-4 text-[#4a5568]" />
+                    )}
+                  </button>
                 </div>
               </div>
 
               <div>
-                <Label className="text-sm font-medium text-gray-700">Display Name</Label>
-                <p className="mt-1 text-gray-900">{user?.displayName || 'Loading...'}</p>
+                <label className="block text-sm font-semibold text-[#4a5568] mb-3 uppercase tracking-wide">Display Name</label>
+                <div className="bg-[#f8fafc] border border-[#e2e8f0] px-4 py-3 rounded-xl text-[#1a202c] font-medium">
+                  {user?.displayName || 'Loading...'}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-[#4a5568] mb-3 uppercase tracking-wide">Wallet Address</label>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-[#f8fafc] border border-[#e2e8f0] px-4 py-3 rounded-xl text-sm font-mono text-[#1a202c]">
+                    {user?.address ? `${user.address.slice(0, 6)}...${user.address.slice(-4)}` : 'Loading...'}
+                  </div>
+                  <button
+                    className="p-3 bg-[#f7fafc] hover:bg-[#edf2f7] border border-[#e2e8f0] rounded-xl transition-colors duration-200 shrink-0"
+                    onClick={() => user?.address && window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
+                    disabled={!user?.address}
+                  >
+                    <ExternalLink className="h-4 w-4 text-[#4a5568]" />
+                  </button>
+                </div>
               </div>
 
               {user?.bio && (
                 <div>
-                  <Label className="text-sm font-medium text-gray-700">Bio</Label>
-                  <p className="mt-1 text-gray-900">{user.bio}</p>
+                  <label className="block text-sm font-semibold text-[#4a5568] mb-3 uppercase tracking-wide">Bio</label>
+                  <div className="bg-[#f8fafc] border border-[#e2e8f0] px-4 py-3 rounded-xl text-[#1a202c] min-h-[48px]">
+                    {user.bio}
+                  </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

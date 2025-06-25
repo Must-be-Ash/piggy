@@ -14,12 +14,15 @@ import { Coffee, LinkIcon } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthModal } from "@/components/auth-modal"
 import { Header } from "@/components/header"
+import { LoadingState } from "@/components/loading-state"
 
 export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState("")
   const [bio, setBio] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
+  const [pageLoading, setPageLoading] = useState(true)
+  const [connectionChecked, setConnectionChecked] = useState(false)
   const [slugStatus, setSlugStatus] = useState<{
     available: boolean | null
     checking: boolean
@@ -42,6 +45,16 @@ export default function OnboardingPage() {
     return address?.slice(0, 8).toLowerCase() || "user"
   }
 
+  // Handle connection state and page loading
+  useEffect(() => {
+    // Give time for wallet connection to be restored
+    const timer = setTimeout(() => {
+      setConnectionChecked(true)
+      setPageLoading(false)
+    }, 1000)
+    return () => clearTimeout(timer)
+  }, [])
+
   // Fetch existing user data if they're editing
   useEffect(() => {
     const fetchExistingUser = async () => {
@@ -61,10 +74,10 @@ export default function OnboardingPage() {
       }
     }
 
-    if (isConnected && address) {
+    if (connectionChecked && isConnected && address) {
       fetchExistingUser()
     }
-  }, [address, isConnected])
+  }, [address, isConnected, connectionChecked])
 
   // Debounced slug checking
   const checkSlugAvailability = useCallback(async (name: string) => {
@@ -193,6 +206,18 @@ export default function OnboardingPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // Show loading state while checking connection
+  if (pageLoading || !connectionChecked) {
+    return (
+      <LoadingState 
+        title="Loading Profile Setup"
+        description="Preparing your crypto donation profile workspace..."
+        showProgress={true}
+        showSkeleton={false}
+      />
+    )
   }
 
   if (!isConnected) {

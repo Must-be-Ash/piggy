@@ -274,20 +274,20 @@ export default function DashboardPage() {
         </div>
 
         {/* Main Actions Grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-8 sm:mb-12">
+        <div className="flex justify-center gap-3 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 mb-8 sm:mb-12">
           {/* Mobile simplified buttons */}
           <button 
-            className="sm:hidden group relative p-4 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center"
+            className="sm:hidden group relative p-3 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center flex-1 max-w-[110px]"
             onClick={copyLink}
             disabled={!user?.slug}
           >
-            <div className={`w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2 transition-colors duration-300 ${
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center mx-auto mb-2 transition-colors duration-300 ${
               isCopied ? 'bg-green-100' : 'bg-[#f7fafc]'
             }`}>
               {isCopied ? (
-                <Check className="h-4 w-4 text-green-600" />
+                <Check className="h-3 w-3 text-green-600" />
               ) : (
-                <Copy className="h-4 w-4 text-[#4a5568]" />
+                <Copy className="h-3 w-3 text-[#4a5568]" />
               )}
             </div>
             <span className="text-xs font-medium text-[#1a202c] block">
@@ -296,7 +296,7 @@ export default function DashboardPage() {
           </button>
 
           <button
-            className="sm:hidden group relative p-4 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center"
+            className="sm:hidden group relative p-3 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center flex-1 max-w-[110px]"
             onClick={() => {
               if (user?.slug) {
                 router.push(`/u/${user.slug}`)
@@ -304,18 +304,18 @@ export default function DashboardPage() {
             }}
             disabled={!user?.slug}
           >
-            <div className="w-10 h-10 bg-[#f7fafc] rounded-lg flex items-center justify-center mx-auto mb-2">
-              <ExternalLink className="h-4 w-4 text-[#4a5568]" />
+            <div className="w-8 h-8 bg-[#f7fafc] rounded-lg flex items-center justify-center mx-auto mb-2">
+              <ExternalLink className="h-3 w-3 text-[#4a5568]" />
             </div>
             <span className="text-xs font-medium text-[#1a202c] block">Preview</span>
           </button>
 
           <button
-            className="sm:hidden group relative p-4 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center"
+            className="sm:hidden group relative p-3 bg-white border border-[#e2e8f0] rounded-xl hover:border-[#cbd5e0] transition-all duration-200 text-center flex-1 max-w-[110px]"
             onClick={() => router.push("/onboarding")}
           >
-            <div className="w-10 h-10 bg-[#f7fafc] rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Settings className="h-4 w-4 text-[#4a5568]" />
+            <div className="w-8 h-8 bg-[#f7fafc] rounded-lg flex items-center justify-center mx-auto mb-2">
+              <Settings className="h-3 w-3 text-[#4a5568]" />
             </div>
             <span className="text-xs font-medium text-[#1a202c] block">Edit</span>
           </button>

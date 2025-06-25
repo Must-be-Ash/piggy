@@ -3,11 +3,16 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Heart, Coffee, Gift } from "lucide-react"
-import { EnhancedCryptoDonateModal } from "./enhanced-crypto-donate-modal"
+import { EnhancedDonationModal } from "./enhanced-donation-modal"
+
+interface DonationRecipient {
+  displayName: string
+  avatar?: string
+  address: string
+}
 
 interface DonateButtonProps {
-  recipientAddress: string
-  recipientName: string
+  recipient: DonationRecipient
   variant?: "default" | "coffee" | "heart" | "gift"
   size?: "sm" | "default" | "lg"
   className?: string
@@ -15,8 +20,7 @@ interface DonateButtonProps {
 }
 
 export function DonateButton({ 
-  recipientAddress, 
-  recipientName,
+  recipient,
   variant = "default",
   size = "default",
   className = "",
@@ -80,9 +84,8 @@ export function DonateButton({
       </Button>
 
       {isModalOpen && (
-        <EnhancedCryptoDonateModal
-          recipientAddress={recipientAddress}
-          recipientName={recipientName}
+        <EnhancedDonationModal
+          recipient={recipient}
           onClose={() => setIsModalOpen(false)}
         />
       )}

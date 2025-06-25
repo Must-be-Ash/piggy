@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Copy, Check, Share } from "lucide-react"
+import { SiFarcaster } from "react-icons/si"
 import { useToast } from "@/hooks/use-toast"
 
 interface CopyLinkButtonProps {
@@ -97,7 +98,7 @@ interface ShareButtonProps {
   url?: string
   title?: string
   text?: string
-  platform: "twitter" | "facebook" | "linkedin" | "telegram" | "whatsapp"
+  platform: "twitter" | "farcaster"
   className?: string
   size?: "sm" | "default" | "lg"
 }
@@ -119,14 +120,8 @@ export function ShareButton({
     switch (platform) {
       case "twitter":
         return `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`
-      case "facebook":
-        return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`
-      case "linkedin":
-        return `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
-      case "telegram":
-        return `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`
-      case "whatsapp":
-        return `https://wa.me/?text=${encodedText}%20${encodedUrl}`
+      case "farcaster":
+        return `https://warpcast.com/~/compose?text=${encodedText}%20${encodedUrl}`
       default:
         return shareUrl
     }
@@ -136,14 +131,8 @@ export function ShareButton({
     switch (platform) {
       case "twitter":
         return "𝕏"
-      case "facebook":
-        return "f"
-      case "linkedin":
-        return "in"
-      case "telegram":
-        return "tg"
-      case "whatsapp":
-        return "wa"
+      case "farcaster":
+        return <SiFarcaster className="h-4 w-4 text-current" />
       default:
         return <Share className="h-4 w-4" />
     }

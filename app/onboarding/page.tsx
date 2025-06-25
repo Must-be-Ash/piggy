@@ -10,15 +10,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Coffee, LinkIcon } from "lucide-react"
+import { Coffee, LinkIcon, Zap, Shield } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { AuthModal } from "@/components/auth-modal"
 import { Header } from "@/components/header"
 import { LoadingState } from "@/components/loading-state"
+import { AvatarUpload } from "@/components/avatar-upload"
 
 export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState("")
   const [bio, setBio] = useState("")
+  const [avatar, setAvatar] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
@@ -67,6 +69,7 @@ export default function OnboardingPage() {
           const user = data.user || data
           setDisplayName(user.displayName || "")
           setBio(user.bio || "")
+          setAvatar(user.avatar || null)
           setIsEditing(true)
         }
       } catch (error) {
@@ -166,6 +169,7 @@ export default function OnboardingPage() {
           body: JSON.stringify({
             displayName: displayName.trim(),
             bio: bio.trim(),
+            avatar: avatar,
           }),
         })
         successMessage = "Profile updated! 🎉"
@@ -180,6 +184,7 @@ export default function OnboardingPage() {
             address,
             displayName: displayName.trim(),
             bio: bio.trim(),
+            avatar: avatar,
             slug,
           }),
         })
@@ -235,94 +240,145 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-[#2d3748] via-[#4a5568] to-[#1a202c]">
       <Header />
       
-      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <Coffee className="h-12 w-12 text-purple-600 mx-auto mb-4" />
-            <CardTitle className="text-2xl">
-              {isEditing ? "Edit Your Profile" : "Complete Your Profile"}
-            </CardTitle>
-            <CardDescription>
-              {isEditing 
-                ? "Update your crypto donation page information" 
-                : "Set up your crypto donation page in just a few steps"
-              }
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name *</Label>
-                <Input
-                  id="displayName"
-                  placeholder="Your name or handle"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  maxLength={50}
-                  required
-                />
-                <div className="flex flex-col space-y-1">
-                  <p className="text-xs text-gray-500">
-                    This will be shown on your donation page
-                  </p>
-                  {slugStatus.message && (
-                    <p className={`text-xs ${
-                      slugStatus.checking 
-                        ? 'text-gray-500' 
-                        : slugStatus.available 
-                          ? 'text-green-600' 
-                          : 'text-red-600'
-                    }`}>
-                      {slugStatus.message}
-                    </p>
-                  )}
-                </div>
+      {/* Main Section */}
+      <div className="relative text-white overflow-hidden min-h-[calc(100vh-80px)]">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+        
+        <div className="relative max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <div className="w-full">
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
+                <Coffee className="h-10 w-10 text-[#2d3748]" />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio (Optional)</Label>
-                <Textarea
-                  id="bio"
-                  placeholder="Tell your supporters about yourself..."
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  rows={3}
-                  maxLength={500}
-                />
-                <p className="text-xs text-gray-500">
-                  {bio.length}/500 characters
-                </p>
-              </div>
-
-              <div className="bg-gray-50 p-3 rounded-lg">
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <LinkIcon className="h-4 w-4" />
-                  <span>Your page will be:</span>
-                </div>
-                <p className="text-sm font-mono mt-1 break-all">
-                  cryptocoffee.app/u/{displayName ? generateSlug(displayName, address || '') : 'your-username'}
-                </p>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full" 
-                disabled={
-                  isLoading || 
-                  !displayName.trim() || 
-                  slugStatus.checking || 
-                  (slugStatus.available === false)
+              <h1 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">
+                {isEditing ? "Edit Your Profile" : "Complete Your Profile"}
+              </h1>
+              <p className="text-xl text-gray-300 leading-relaxed">
+                {isEditing 
+                  ? "Update your crypto donation page information" 
+                  : "Set up your crypto donation page in just a few steps"
                 }
-              >
-                {isLoading ? "Saving..." : (isEditing ? "Update Profile" : "Create My Page")}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+              </p>
+            </div>
+
+            {/* Form Section */}
+            <div className="max-w-xl mx-auto">
+              <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
+                <CardContent className="p-6 sm:p-8">
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Avatar Upload */}
+                    <div className="flex justify-center">
+                      <AvatarUpload
+                        currentAvatar={avatar || undefined}
+                        onAvatarChange={setAvatar}
+                        size="md"
+                        disabled={isLoading}
+                      />
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="displayName" className="text-base font-semibold text-[#1a202c]">
+                        Display Name *
+                      </Label>
+                      <Input
+                        id="displayName"
+                        placeholder="Your name or handle"
+                        value={displayName}
+                        onChange={(e) => setDisplayName(e.target.value)}
+                        maxLength={50}
+                        required
+                        className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
+                      />
+                      <div className="space-y-2">
+                        <p className="text-sm text-[#718096]">
+                          This will be shown on your donation page
+                        </p>
+                        {slugStatus.message && (
+                          <div className={`flex items-center gap-2 p-3 rounded-lg ${
+                            slugStatus.checking 
+                              ? 'bg-gray-50 text-gray-600' 
+                              : slugStatus.available 
+                                ? 'bg-green-50 text-green-700' 
+                                : 'bg-red-50 text-red-700'
+                          }`}>
+                            <div className={`w-2 h-2 rounded-full ${
+                              slugStatus.checking 
+                                ? 'bg-gray-400 animate-pulse' 
+                                : slugStatus.available 
+                                  ? 'bg-green-500' 
+                                  : 'bg-red-500'
+                            }`}></div>
+                            <span className="text-sm font-medium">{slugStatus.message}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label htmlFor="bio" className="text-base font-semibold text-[#1a202c]">
+                        Bio (Optional)
+                      </Label>
+                      <Textarea
+                        id="bio"
+                        placeholder="Tell your supporters about yourself..."
+                        value={bio}
+                        onChange={(e) => setBio(e.target.value)}
+                        rows={3}
+                        maxLength={500}
+                        className="text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl resize-none"
+                      />
+                      <div className="flex justify-between items-center">
+                        <p className="text-sm text-[#718096]">
+                          Share your story and goals
+                        </p>
+                        <span className="text-sm text-[#718096] font-mono">
+                          {bio.length}/500
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border border-[#e2e8f0] p-4 rounded-xl">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-6 h-6 bg-[#2d3748] rounded-lg flex items-center justify-center">
+                          <LinkIcon className="h-3 w-3 text-white" />
+                        </div>
+                        <span className="font-semibold text-[#1a202c] text-sm">Your page URL:</span>
+                      </div>
+                      <div className="bg-white border border-[#e2e8f0] p-3 rounded-lg">
+                        <p className="text-sm font-mono text-[#2d3748] break-all">
+                          cryptocoffee.app/u/{displayName ? generateSlug(displayName, address || '') : 'your-username'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button 
+                      type="submit" 
+                      className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[#2d3748] to-[#4a5568] hover:from-[#1a202c] hover:to-[#2d3748] rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300" 
+                      disabled={
+                        isLoading || 
+                        !displayName.trim() || 
+                        slugStatus.checking || 
+                        (slugStatus.available === false)
+                      }
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center gap-3">
+                          <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                          Saving...
+                        </div>
+                      ) : (
+                        isEditing ? "Update Profile" : "Create My Page"
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

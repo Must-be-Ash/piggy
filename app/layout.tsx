@@ -1,16 +1,73 @@
 import type React from "react"
-import type { Metadata } from "next"
-import { Inter } from "next/font/google"
 import "./globals.css"
+import { Inter } from "next/font/google"
 import { Web3Provider } from "@/components/web3-provider"
 import { Toaster } from "@/components/ui/toaster"
+import { Analytics } from "@vercel/analytics/react"
+import type { Metadata, Viewport } from 'next'
 
 const inter = Inter({ subsets: ["latin"] })
 
+export const viewport: Viewport = {
+  themeColor: "#2d3748",
+}
+
 export const metadata: Metadata = {
   title: "CryptoCoffee - Accept Crypto Donations",
-  description: "Create your personalized crypto donation page and accept tips in any token",
-    generator: 'v0.dev'
+  description: "Create your personalized crypto donation page and accept tips in any cryptocurrency. Simple, secure, and beautiful.",
+  keywords: "crypto donations, cryptocurrency tips, crypto tipping, donation page, web3 donations, accept crypto, bitcoin donations, ethereum donations",
+  authors: [{ name: "CryptoCoffee" }],
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+    ],
+    other: [
+      { 
+        rel: 'mask-icon', 
+        url: '/safari-pinned-tab.svg',
+        color: '#2d3748'
+      },
+    ],
+  },
+  manifest: '/site.webmanifest',
+  openGraph: {
+    title: "CryptoCoffee - Accept Crypto Donations",
+    description: "Create your personalized crypto donation page and accept tips in any cryptocurrency. Simple, secure, and beautiful.",
+    url: "https://cryptocoffee.app/",
+    type: "website",
+    images: [
+      {
+        url: "https://cryptocoffee.app/og.png",
+        width: 1200,
+        height: 630,
+        alt: "CryptoCoffee - Accept Crypto Donations"
+      },
+    ],
+    siteName: "CryptoCoffee",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CryptoCoffee - Accept Crypto Donations",
+    description: "Create your personalized crypto donation page and accept tips in any cryptocurrency. Simple, secure, and beautiful.",
+    images: ["https://cryptocoffee.app/og.png"],
+    creator: "@cryptocoffeeapp",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 export default function RootLayout({
@@ -19,11 +76,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
         <Web3Provider>
           {children}
           <Toaster />
+          <Analytics />
         </Web3Provider>
       </body>
     </html>

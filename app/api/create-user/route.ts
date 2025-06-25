@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     await connectDB()
     
     const body = await request.json()
-    const { address, slug, displayName, bio } = body
+    const { address, slug, displayName, bio, avatar } = body
     
     // Validate required fields
     if (!address || !slug) {
@@ -54,7 +54,8 @@ export async function POST(request: NextRequest) {
       address: address.toLowerCase(),
       slug: slug.toLowerCase(),
       displayName: displayName?.trim() || '',
-      bio: bio?.trim() || ''
+      bio: bio?.trim() || '',
+      avatar: avatar?.trim() || null
     })
     
     await newUser.save()
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
           slug: newUser.slug,
           displayName: newUser.displayName,
           bio: newUser.bio,
+          avatar: newUser.avatar,
           createdAt: newUser.createdAt
         }
       },

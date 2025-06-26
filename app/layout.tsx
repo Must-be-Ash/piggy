@@ -23,10 +23,10 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "CryptoCoffee - Accept Crypto Donations",
-  description: "Create your personalized crypto donation page and accept tips in any cryptocurrency. Simple, secure, and beautiful.",
-  keywords: "crypto donations, cryptocurrency tips, crypto tipping, donation page, web3 donations, accept crypto, bitcoin donations, ethereum donations",
-  authors: [{ name: "CryptoCoffee" }],
+  title: "PiggyBack - Get Tips In Any Tokens",
+  description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+  keywords: "tips, crypto donations, cryptocurrency tips, crypto tipping, donation page, web3 donations, accept crypto, bitcoin donations, ethereum donations",
+  authors: [{ name: "PiggyBack" }],
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -46,26 +46,26 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   openGraph: {
-    title: "CryptoCoffee - Accept Crypto Donations",
-    description: "Create your personalized crypto donation page and accept tips in any cryptocurrency. Simple, secure, and beautiful.",
-    url: "https://cryptocoffee.app/",
+    title: "PiggyBack - Get Tips In Any Tokens",
+    description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+    url: "https://piggyback.app/",
     type: "website",
     images: [
       {
-        url: "https://cryptocoffee.app/og.png",
+        url: "https://PiggyBack.app/og.png",
         width: 1200,
         height: 630,
-        alt: "CryptoCoffee - Accept Crypto Donations"
+        alt: "PiggyBack - Get Tips In Any Tokens"
       },
     ],
-    siteName: "CryptoCoffee",
+    siteName: "PiggyBack",
   },
   twitter: {
     card: "summary_large_image",
-    title: "CryptoCoffee - Accept Crypto Donations",
-    description: "Create your personalized crypto donation page and accept tips in any cryptocurrency. Simple, secure, and beautiful.",
-    images: ["https://cryptocoffee.app/og.png"],
-    creator: "@cryptocoffeeapp",
+    title: "PiggyBack - Get Tips In Any Tokens",
+    description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+    images: ["https://piggyback.app/og.png"],
+    creator: "@piggybackapp",
   },
   robots: {
     index: true,

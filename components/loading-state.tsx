@@ -1,3 +1,5 @@
+import { Snout } from "@/components/ui/snout"
+
 interface LoadingStateProps {
   title?: string
   description?: string
@@ -14,11 +16,10 @@ export function LoadingState({
   return (
     <div className="min-h-screen bg-[#fafbfc] flex items-center justify-center">
       <div className="text-center max-w-md mx-auto px-4">
-        {/* Simple loading spinner */}
+        {/* Snout icon with animation */}
         <div className="relative mb-8">
-          <div className="w-12 h-12 mx-auto">
-            <div className="w-full h-full border-3 border-[#e2e8f0] rounded-full"></div>
-            <div className="absolute inset-0 w-full h-full border-3 border-transparent border-t-[#2d3748] rounded-full animate-spin"></div>
+          <div className="w-16 h-16 mx-auto animate-pulse">
+            <Snout className="w-full h-full text-[#2d3748]" />
           </div>
         </div>
 

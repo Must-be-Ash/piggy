@@ -4,7 +4,8 @@ import { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
 import { DynamicWidget, useDynamicContext } from "@dynamic-labs/sdk-react-core"
 import { Button } from "@/components/ui/button"
-import { Coffee, User, Settings, LogOut, Shield, ExternalLink, Copy, Check } from "lucide-react"
+import { User, Settings, LogOut, Shield, ExternalLink, Copy, Check } from "lucide-react"
+import { Snout } from "@/components/ui/snout"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -134,13 +135,13 @@ export function Header({ className = "" }: HeaderProps) {
           <div className="relative">
             <div className="absolute inset-0 bg-white rounded-xl blur-sm opacity-20 group-hover:opacity-30 transition-opacity duration-200 pointer-events-none"></div>
             <div className="relative p-2.5 bg-gradient-to-br from-white to-gray-200 rounded-xl shadow-lg">
-              <Coffee className="h-6 w-6 text-[#2d3748]" />
+              <Snout className="h-6 w-6 text-[#2d3748]" />
             </div>
           </div>
           <div className="text-left">
             <h1 className={`text-xl font-bold tracking-tight transition-colors duration-300 ${
               pathname === '/' && isScrolledToWhite ? 'text-gray-900' : 'text-white'
-            }`}>CryptoCoffee</h1>
+            }`}>PiggyBack</h1>
             <p className={`text-xs font-medium hidden sm:block transition-colors duration-300 ${
               pathname === '/' && isScrolledToWhite ? 'text-gray-600' : 'text-gray-300'
             }`}>Crypto Donations</p>
@@ -298,7 +299,7 @@ export function Header({ className = "" }: HeaderProps) {
                       <div className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border border-[#e2e8f0] p-3 rounded-lg">
                         <p className="text-xs text-[#718096] font-medium mb-1">Your Page</p>
                         <p className="text-xs font-mono text-[#2d3748] truncate">
-                          cryptocoffee.app/u/{user.slug}
+                          PiggyBack.app/u/{user.slug}
                         </p>
                       </div>
                     )}
@@ -405,7 +406,7 @@ export function Header({ className = "" }: HeaderProps) {
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-300 font-medium mb-1">Your Link</p>
                 <code className="text-xs bg-black/40 px-2 py-1 rounded font-mono text-gray-200 border border-white/20 block truncate">
-                  cryptocoffee.app/u/{user.slug}
+                  PiggyBack.app/u/{user.slug}
                 </code>
               </div>
               <button

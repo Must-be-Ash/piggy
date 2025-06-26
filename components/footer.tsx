@@ -11,10 +11,12 @@ export function Footer() {
           href="https://x.com/Must_be_Ash" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="text-gray-300 hover:text-white transition-colors duration-200"
+          className="transition-colors duration-200"
+          style={{ color: '#EC9AA6' }}
         >
           @must_be_ash
         </Link>
+        {" "}🐷
       </p>
     </footer>
   )

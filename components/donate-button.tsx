@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Heart, Coffee, Gift } from "lucide-react"
+import { Heart, Gift } from "lucide-react"
+import { Snout } from "@/components/ui/snout"
 import { EnhancedDonationModal } from "./enhanced-donation-modal"
 
 interface DonationRecipient {
@@ -35,7 +36,7 @@ export function DonateButton({
       case "coffee":
         return (
           <>
-            <Coffee className="h-4 w-4 mr-2" />
+            <Snout className="h-4 w-4 mr-2" />
             Buy me a coffee
           </>
         )

@@ -8,7 +8,8 @@ import { useAccount } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Coffee, Copy, ExternalLink, LogOut, Settings, TrendingUp, Check, Shield, User } from "lucide-react"
+import { Copy, ExternalLink, LogOut, Settings, TrendingUp, Check, Shield, User } from "lucide-react"
+import { Snout } from "@/components/ui/snout"
 import { useDynamicContext } from "@dynamic-labs/sdk-react-core"
 import { useToast } from "@/hooks/use-toast"
 import { TextShimmer } from "@/components/ui/text-shimmer"
@@ -378,7 +379,7 @@ export default function DashboardPage() {
                         {user?.slug 
                           ? (mounted && typeof window !== 'undefined' 
                               ? `${window.location.origin}/u/${user.slug}` 
-                              : `cryptocoffee.app/u/${user.slug}`)
+                              : `PiggyBack.app/u/${user.slug}`)
                           : 'Loading...'
                         }
                       </div>

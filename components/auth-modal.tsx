@@ -12,7 +12,7 @@ interface AuthModalProps {
 
 export function AuthModal({ 
   title = "Connect Your Wallet", 
-  description = "Connect your wallet to get started with CryptoCoffee",
+  description = "Connect your wallet to get started with PiggyBack",
   className = ""
 }: AuthModalProps) {
   return (

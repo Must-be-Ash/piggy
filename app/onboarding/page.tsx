@@ -10,7 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Coffee, LinkIcon, Zap, Shield } from "lucide-react"
+import { LinkIcon, Zap, Shield } from "lucide-react"
+import { Snout } from "@/components/ui/snout"
 import { useToast } from "@/hooks/use-toast"
 import { AuthModal } from "@/components/auth-modal"
 import { Header } from "@/components/header"
@@ -251,7 +252,7 @@ export default function OnboardingPage() {
           <div className="w-full">
             <div className="text-center mb-8">
               <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                <Coffee className="h-10 w-10 text-[#2d3748]" />
+                <Snout className="h-10 w-10 text-[#2d3748]" />
               </div>
               <h1 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">
                 {isEditing ? "Edit Your Profile" : "Complete Your Profile"}
@@ -349,7 +350,7 @@ export default function OnboardingPage() {
                       </div>
                       <div className="bg-white border border-[#e2e8f0] p-3 rounded-lg">
                         <p className="text-sm font-mono text-[#2d3748] break-all">
-                          cryptocoffee.app/u/{displayName ? generateSlug(displayName, address || '') : 'your-username'}
+                          PiggyBack.app/u/{displayName ? generateSlug(displayName, address || '') : 'your-username'}
                         </p>
                       </div>
                     </div>

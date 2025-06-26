@@ -1,4 +1,4 @@
-# CryptoCoffee Implementation Todo List
+# PiggyBack Implementation Todo List
 
 ## 🚨 Critical Next.js 15 Compatibility Issues (IMMEDIATE PRIORITY)
 

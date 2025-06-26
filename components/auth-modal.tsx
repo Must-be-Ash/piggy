@@ -16,15 +16,15 @@ export function AuthModal({
   className = ""
 }: AuthModalProps) {
   return (
-    <Card className={`w-full max-w-md mx-auto ${className}`}>
+    <Card className={`w-full max-w-md mx-auto bg-white/95 backdrop-blur-sm border-0 shadow-2xl ${className}`}>
       <CardHeader className="text-center">
         <div className="flex justify-center mb-4">
-          <div className="p-3 bg-purple-100 rounded-full">
-            <Wallet className="h-8 w-8 text-purple-600" />
+          <div className="p-3 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full shadow-lg">
+            <Wallet className="h-8 w-8 text-white" />
           </div>
         </div>
-        <CardTitle className="text-2xl font-bold">{title}</CardTitle>
-        <CardDescription className="text-gray-600">
+        <CardTitle className="text-2xl font-bold text-[#1a202c]">{title}</CardTitle>
+        <CardDescription className="text-[#718096]">
           {description}
         </CardDescription>
       </CardHeader>

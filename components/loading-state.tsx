@@ -1,5 +1,3 @@
-import { Coffee } from "lucide-react"
-
 interface LoadingStateProps {
   title?: string
   description?: string
@@ -16,32 +14,11 @@ export function LoadingState({
   return (
     <div className="min-h-screen bg-[#fafbfc] flex items-center justify-center">
       <div className="text-center max-w-md mx-auto px-4">
-        {/* Main loading icon with enhanced animations */}
+        {/* Simple loading spinner */}
         <div className="relative mb-8">
-          {/* Outer ring */}
-          <div className="absolute inset-0 w-24 h-24 mx-auto">
-            <div className="w-full h-full border-4 border-[#e2e8f0] rounded-full"></div>
-            <div className="absolute inset-0 w-full h-full border-4 border-transparent border-t-[#2d3748] rounded-full animate-spin"></div>
-          </div>
-          
-          {/* Middle glow effect */}
-          <div className="absolute inset-2 bg-gradient-to-br from-[#2d3748]/20 to-[#4a5568]/20 rounded-2xl blur-lg animate-pulse"></div>
-          
-          {/* Inner container */}
-          <div className="relative w-24 h-24 mx-auto bg-white border border-[#e2e8f0] rounded-2xl shadow-lg flex items-center justify-center">
-            <div className="relative">
-              <Coffee className="h-8 w-8 text-[#2d3748] animate-bounce" style={{ animationDuration: '1.5s' }} />
-              {/* Steam effect */}
-              <div className="absolute -top-1 left-1/2 transform -translate-x-1/2">
-                <div className="w-0.5 h-2 bg-[#718096] rounded-full opacity-40 animate-pulse"></div>
-              </div>
-              <div className="absolute -top-1 left-1/3 transform">
-                <div className="w-0.5 h-1.5 bg-[#718096] rounded-full opacity-30 animate-pulse" style={{ animationDelay: '0.3s' }}></div>
-              </div>
-              <div className="absolute -top-1 right-1/3 transform">
-                <div className="w-0.5 h-1.5 bg-[#718096] rounded-full opacity-30 animate-pulse" style={{ animationDelay: '0.6s' }}></div>
-              </div>
-            </div>
+          <div className="w-12 h-12 mx-auto">
+            <div className="w-full h-full border-3 border-[#e2e8f0] rounded-full"></div>
+            <div className="absolute inset-0 w-full h-full border-3 border-transparent border-t-[#2d3748] rounded-full animate-spin"></div>
           </div>
         </div>
 

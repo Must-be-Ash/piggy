@@ -227,9 +227,9 @@ export default function OnboardingPage() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-[#2d3748] via-[#4a5568] to-[#1a202c]">
         <Header />
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4">
+        <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4 -mt-16">
           <AuthModal 
             title="Connect to Get Started"
             description="Connect your wallet to create your crypto donation page"

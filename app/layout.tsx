@@ -1,15 +1,25 @@
 import type React from "react"
 import "./globals.css"
-import { Inter } from "next/font/google"
+import { Inter, Cormorant_Garamond } from "next/font/google"
 import { Web3Provider } from "@/components/web3-provider"
+import { Footer } from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import { Analytics } from "@vercel/analytics/react"
 import type { Metadata, Viewport } from 'next'
 
 const inter = Inter({ subsets: ["latin"] })
+const cormorantGaramond = Cormorant_Garamond({ 
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-cormorant"
+})
 
 export const viewport: Viewport = {
   themeColor: "#2d3748",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 }
 
 export const metadata: Metadata = {
@@ -76,10 +86,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="bg-[#333333]">
+      <body className={`${inter.className} ${cormorantGaramond.variable} bg-[#333333]`} suppressHydrationWarning>
         <Web3Provider>
-          {children}
+          <div className="min-h-screen flex flex-col bg-[#333333]">
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+          </div>
           <Toaster />
           <Analytics />
         </Web3Provider>

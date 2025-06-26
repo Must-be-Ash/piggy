@@ -396,11 +396,35 @@ export function Web3Provider({ children }: { children: React.ReactNode }) {
         environmentId,
         walletConnectors: [EthereumWalletConnectors],
         initialAuthenticationMode: "connect-only",
-        shadowDOMEnabled: true,
+        shadowDOMEnabled: false,
         networkValidationMode: "never", // Allow any network
         events: {
-          onAuthSuccess: (args) => {
+          onAuthSuccess: async (args) => {
             console.log("Auth success:", args)
+            
+            // Get the user's wallet address
+            const address = args.user?.verifiedCredentials?.[0]?.address
+            
+            if (address && typeof window !== 'undefined') {
+              try {
+                // Check if user already exists in our database
+                const response = await fetch(`/api/get-user?address=${address}`)
+                
+                if (response.ok) {
+                  // User exists, redirect to dashboard
+                  console.log("Existing user found, redirecting to dashboard")
+                  window.location.href = '/dashboard'
+                } else {
+                  // User doesn't exist, redirect to onboarding
+                  console.log("New user, redirecting to onboarding")
+                  window.location.href = '/onboarding'
+                }
+              } catch (error) {
+                console.error("Error checking user existence:", error)
+                // On error, default to onboarding
+                window.location.href = '/onboarding'
+              }
+            }
           },
           onLogout: () => {
             console.log("Logged out")

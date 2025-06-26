@@ -10,6 +10,11 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			inter: ['Inter', 'sans-serif'],
+  			'pp-editorial': ['PP Editorial New', 'var(--font-cormorant)', 'serif'],
+  			'cormorant': ['var(--font-cormorant)', 'serif'],
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -83,11 +88,25 @@ const config: Config = {
   				to: {
   					height: '0'
   				}
+  			},
+  			'shimmer': {
+  				'0%': {
+  					transform: 'translateX(-100%)'
+  				},
+  				'100%': {
+  					transform: 'translateX(100%)'
+  				}
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
-  			'accordion-up': 'accordion-up 0.2s ease-out'
+  			'accordion-up': 'accordion-up 0.2s ease-out',
+  			'shimmer': 'shimmer 2.5s ease-in-out infinite'
+  		},
+  		animationDelay: {
+  			'1000': '1000ms',
+  			'1500': '1500ms',
+  			'2000': '2000ms',
   		}
   	}
   },

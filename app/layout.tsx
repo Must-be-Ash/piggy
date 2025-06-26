@@ -48,11 +48,11 @@ export const metadata: Metadata = {
   openGraph: {
     title: "PiggyBack - Get Tips In Any Tokens",
     description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
-    url: "https://piggyback.app/",
+    url: "https://piggybanks.xyz/",
     type: "website",
     images: [
       {
-        url: "https://PiggyBack.app/og.png",
+        url: "https://piggybanks.xyz/og.png",
         width: 1200,
         height: 630,
         alt: "PiggyBack - Get Tips In Any Tokens"
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "PiggyBack - Get Tips In Any Tokens",
     description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
-    images: ["https://piggyback.app/og.png"],
+    images: ["https://piggybanks.xyz/og.png"],
     creator: "@piggybackapp",
   },
   robots: {

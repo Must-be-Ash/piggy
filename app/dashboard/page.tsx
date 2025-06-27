@@ -372,9 +372,20 @@ export default function DashboardPage() {
           {/* Profile Information */}
           <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
             <CardContent className="p-8">
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-[#1a202c] mb-2">Profile Overview</h2>
-                <p className="text-[#718096]">Your donation page details and sharing information</p>
+              <div className="mb-8 flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#1a202c] mb-2">Profile Overview</h2>
+                  <p className="text-[#718096]">Your donation page details and sharing information</p>
+                </div>
+                <Button
+                  onClick={() => router.push("/onboarding")}
+                  variant="outline"
+                  size="sm"
+                  className="border border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white font-medium rounded-lg px-3 py-2 transition-all duration-200"
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -442,28 +453,19 @@ export default function DashboardPage() {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-[#4a5568] mb-3 uppercase tracking-wide">Member Since</label>
-                    <div className="bg-[#f8fafc] border border-[#e2e8f0] px-4 py-3 rounded-xl text-[#1a202c] font-medium">
-                      {user?.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      }) : 'Loading...'}
-                    </div>
-                  </div>
-
-                  <div className="pt-4">
-                    <Button
-                      onClick={handleLogout}
-                      variant="outline"
-                      className="w-full border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold rounded-xl transition-all duration-200"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Disconnect Wallet
-                    </Button>
-                  </div>
                 </div>
+              </div>
+
+              {/* Disconnect Button - Full Width at Bottom */}
+              <div className="mt-8 pt-6 border-t border-[#e2e8f0]">
+                <Button
+                  onClick={handleLogout}
+                  variant="outline"
+                  className="w-full border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold rounded-xl transition-all duration-200"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Disconnect Wallet
+                </Button>
               </div>
             </CardContent>
           </Card>

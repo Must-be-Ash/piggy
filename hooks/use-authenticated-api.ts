@@ -3,12 +3,22 @@
 import { useConfig } from 'wagmi'
 import { useToast } from './use-toast'
 import { authenticatedFetch } from '@/lib/wallet-auth'
+import { useState, useEffect } from 'react'
 
 export function useAuthenticatedApi() {
+  const [mounted, setMounted] = useState(false)
   const wagmiConfig = useConfig()
   const { toast } = useToast()
 
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const updateUser = async (address: string, updateData: Record<string, any>) => {
+    if (!mounted) {
+      throw new Error('Component not mounted yet')
+    }
+
     try {
       const response = await authenticatedFetch(
         `/api/get-user?address=${address}`,
@@ -40,6 +50,10 @@ export function useAuthenticatedApi() {
   }
 
   const deleteUser = async (address: string) => {
+    if (!mounted) {
+      throw new Error('Component not mounted yet')
+    }
+
     try {
       const response = await authenticatedFetch(
         `/api/get-user?address=${address}`,

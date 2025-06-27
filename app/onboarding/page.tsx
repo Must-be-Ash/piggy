@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { useAccount, useConfig } from "wagmi"
+import { useAccount } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -18,6 +18,9 @@ import { Header } from "@/components/header"
 import { LoadingState } from "@/components/loading-state"
 import { AvatarUpload } from "@/components/avatar-upload"
 import { useAuthenticatedApi } from "@/hooks/use-authenticated-api"
+
+// Force dynamic rendering to prevent SSG issues with wagmi
+export const dynamic = 'force-dynamic'
 
 export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState("")

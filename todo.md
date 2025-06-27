@@ -1,4 +1,4 @@
-# PiggyBank Implementation Todo List
+# PiggyBanks Implementation Todo List
 
 ## 🚨 Critical Next.js 15 Compatibility Issues (IMMEDIATE PRIORITY)
 

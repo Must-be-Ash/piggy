@@ -133,21 +133,21 @@ function DonationPageContent({ user }: DonationPageProps) {
                         url={pageUrl} 
                         variant="outline"
                         size="sm"
-                        className="bg-white/10 hover:bg-white/20 text-white border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 flex-1 max-w-[120px]"
+                        className="bg-white/10 hover:bg-[#EC9AA6] text-white border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 flex-1 max-w-[120px]"
                       />
                       <ShareButton 
                         platform="twitter" 
                         url={pageUrl} 
                         text={`Support ${user.displayName} with crypto donations!`}
                         size="sm"
-                        className="bg-white/10 hover:bg-white/20 text-white border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 flex-1 max-w-[120px]"
+                        className="bg-white/10 hover:bg-[#EC9AA6] text-white border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 flex-1 max-w-[120px]"
                       />
                       <ShareButton 
                         platform="farcaster" 
                         url={pageUrl} 
                         text={`Support ${user.displayName} with crypto donations!`}
                         size="sm"
-                        className="bg-white/10 hover:bg-white/20 text-white border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 flex-1 max-w-[120px]"
+                        className="bg-white/10 hover:bg-[#EC9AA6] text-white border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 flex-1 max-w-[120px]"
                       />
                     </div>
                   </div>

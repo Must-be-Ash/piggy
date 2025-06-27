@@ -141,7 +141,7 @@ export function Header({ className = "" }: HeaderProps) {
           <div className="text-left">
             <h1 className={`text-xl font-bold tracking-tight transition-colors duration-300 ${
               pathname === '/' && isScrolledToWhite ? 'text-gray-900' : 'text-white'
-            }`}>PiggyBank</h1>
+            }`}>PiggyBanks</h1>
             <p className={`text-xs font-medium hidden sm:block transition-colors duration-300 ${
               pathname === '/' && isScrolledToWhite ? 'text-gray-600' : 'text-gray-300'
             }`}>Get Tips In Any Tokens</p>
@@ -168,8 +168,8 @@ export function Header({ className = "" }: HeaderProps) {
               size="sm"
               className={`transition-all duration-300 px-4 py-2 rounded-xl font-medium active:scale-95 backdrop-blur-sm border h-10 ${
                 pathname === '/' && isScrolledToWhite 
-                  ? 'text-gray-900 hover:text-gray-900 hover:bg-gray-100 bg-gray-50 border-gray-200'
-                  : 'text-white hover:text-white hover:bg-white/20 bg-white/10 border-white/20'
+                  ? 'text-gray-900 hover:text-black hover:bg-[#EC9AA6] bg-gray-50 border-gray-200'
+                  : 'text-white hover:text-black hover:bg-[#EC9AA6] bg-white/10 border-white/20'
               }`}
             >
               Dashboard
@@ -191,8 +191,8 @@ export function Header({ className = "" }: HeaderProps) {
               size="sm"
               className={`transition-all duration-300 px-4 py-2 rounded-xl font-medium active:scale-95 backdrop-blur-sm border h-10 ${
                 pathname === '/' && isScrolledToWhite 
-                  ? 'text-gray-900 hover:text-gray-900 hover:bg-gray-100 bg-gray-50 border-gray-200'
-                  : 'text-white hover:text-white hover:bg-white/20 bg-white/10 border-white/20'
+                  ? 'text-gray-900 hover:text-black hover:bg-[#EC9AA6] bg-gray-50 border-gray-200'
+                  : 'text-white hover:text-black hover:bg-[#EC9AA6] bg-white/10 border-white/20'
               }`}
             >
               Your Page
@@ -202,22 +202,22 @@ export function Header({ className = "" }: HeaderProps) {
             href="/onboarding" 
             className="touch-manipulation" 
             onClick={(e) => {
-              console.log('Get Started clicked', e);
+              console.log(`${isConnected ? 'Edit Profile' : 'Get Started'} clicked`, e);
               e.preventDefault();
               window.location.href = '/onboarding';
             }}
-            onTouchStart={() => console.log('Get Started touch start')}
+            onTouchStart={() => console.log(`${isConnected ? 'Edit Profile' : 'Get Started'} touch start`)}
           >
             <Button
               variant="ghost"
               size="sm"
               className={`transition-all duration-300 px-4 py-2 rounded-xl font-medium active:scale-95 backdrop-blur-sm border h-10 ${
                 pathname === '/' && isScrolledToWhite 
-                  ? 'text-gray-900 hover:text-gray-900 hover:bg-gray-100 bg-gray-50 border-gray-200'
-                  : 'text-white hover:text-white hover:bg-white/20 bg-white/10 border-white/20'
+                  ? 'text-gray-900 hover:text-black hover:bg-[#EC9AA6] bg-gray-50 border-gray-200'
+                  : 'text-white hover:text-black hover:bg-[#EC9AA6] bg-white/10 border-white/20'
               }`}
             >
-              Get Started
+              {mounted && isConnected ? 'Edit Profile' : 'Get Started'}
             </Button>
           </Link>
         </nav>
@@ -253,7 +253,7 @@ export function Header({ className = "" }: HeaderProps) {
                 <DropdownMenuTrigger asChild>
                   <Button 
                     variant="ghost" 
-                    className="relative h-12 w-12 rounded-xl hover:bg-white/10 transition-all duration-200 group touch-manipulation"
+                    className="relative h-12 w-12 rounded-xl hover:bg-[#EC9AA6] transition-all duration-200 group touch-manipulation"
                     style={{ minHeight: '48px', minWidth: '48px' }}
                   >
                     <Avatar className="h-10 w-10 border-2 border-white/20 group-hover:border-white/40 transition-colors duration-200">
@@ -299,7 +299,7 @@ export function Header({ className = "" }: HeaderProps) {
                       <div className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border border-[#e2e8f0] p-3 rounded-lg">
                         <p className="text-xs text-[#718096] font-medium mb-1">Your Page</p>
                         <p className="text-xs font-mono text-[#2d3748] truncate">
-                        piggybank.xyz/u/{user.slug}
+                        piggybanks.xyz/u/{user.slug}
                         </p>
                       </div>
                     )}
@@ -310,7 +310,7 @@ export function Header({ className = "" }: HeaderProps) {
                   <DropdownMenuItem asChild>
                     <Link 
                       href="/dashboard" 
-                      className="cursor-pointer flex items-center px-4 py-3 hover:bg-[#f8fafc] transition-colors duration-200"
+                      className="cursor-pointer flex items-center px-4 py-3 hover:bg-[#EC9AA6] hover:text-black transition-colors duration-200"
                     >
                       <User className="mr-3 h-4 w-4 text-[#4a5568]" />
                       <span className="font-medium text-[#1a202c]">Dashboard</span>
@@ -320,7 +320,7 @@ export function Header({ className = "" }: HeaderProps) {
                   <DropdownMenuItem asChild>
                     <Link 
                       href="/onboarding" 
-                      className="cursor-pointer flex items-center px-4 py-3 hover:bg-[#f8fafc] transition-colors duration-200"
+                      className="cursor-pointer flex items-center px-4 py-3 hover:bg-[#EC9AA6] hover:text-black transition-colors duration-200"
                     >
                       <Settings className="mr-3 h-4 w-4 text-[#4a5568]" />
                       <span className="font-medium text-[#1a202c]">Edit Profile</span>
@@ -331,7 +331,7 @@ export function Header({ className = "" }: HeaderProps) {
                     <DropdownMenuItem asChild>
                       <Link 
                         href={`/u/${user.slug}`} 
-                        className="cursor-pointer flex items-center px-4 py-3 hover:bg-[#f8fafc] transition-colors duration-200"
+                        className="cursor-pointer flex items-center px-4 py-3 hover:bg-[#EC9AA6] hover:text-black transition-colors duration-200"
                       >
                         <ExternalLink className="mr-3 h-4 w-4 text-[#4a5568]" />
                         <span className="font-medium text-[#1a202c]">View Page</span>
@@ -376,7 +376,7 @@ export function Header({ className = "" }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full text-white hover:text-white hover:bg-white/20 transition-all duration-200 px-4 py-3 rounded-xl font-medium text-sm min-h-[48px] touch-manipulation active:scale-95 bg-white/10 backdrop-blur-sm border border-white/20"
+                className="w-full text-white hover:text-black hover:bg-[#EC9AA6] transition-all duration-200 px-4 py-3 rounded-xl font-medium text-sm min-h-[48px] touch-manipulation active:scale-95 bg-white/10 backdrop-blur-sm border border-white/20"
               >
                 Dashboard
               </Button>
@@ -385,18 +385,18 @@ export function Header({ className = "" }: HeaderProps) {
               href="/onboarding" 
               className="flex-1 touch-manipulation" 
               onClick={(e) => {
-                console.log('Mobile Get Started clicked', e);
+                console.log(`Mobile ${isConnected ? 'Edit Profile' : 'Get Started'} clicked`, e);
                 e.preventDefault();
                 window.location.href = '/onboarding';
               }}
-              onTouchStart={() => console.log('Mobile Get Started touch start')}
+              onTouchStart={() => console.log(`Mobile ${isConnected ? 'Edit Profile' : 'Get Started'} touch start`)}
             >
               <Button
                 variant="ghost"
                 size="sm"
-                className="w-full text-white hover:text-white hover:bg-white/20 transition-all duration-200 px-4 py-3 rounded-xl font-medium text-sm min-h-[48px] touch-manipulation active:scale-95 bg-white/10 backdrop-blur-sm border border-white/20"
+                className="w-full text-white hover:text-black hover:bg-[#EC9AA6] transition-all duration-200 px-4 py-3 rounded-xl font-medium text-sm min-h-[48px] touch-manipulation active:scale-95 bg-white/10 backdrop-blur-sm border border-white/20"
               >
-                Get Started
+                {mounted && isConnected ? 'Edit Profile' : 'Get Started'}
               </Button>
             </Link>
           </div>
@@ -406,7 +406,7 @@ export function Header({ className = "" }: HeaderProps) {
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-300 font-medium mb-1">Your Link</p>
                 <code className="text-xs bg-black/40 px-2 py-1 rounded font-mono text-gray-200 border border-white/20 block truncate">
-                  PiggyBank.xyz/u/{user.slug}
+                  piggybanks.xyz/u/{user.slug}
                 </code>
               </div>
               <button

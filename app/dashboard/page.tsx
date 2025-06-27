@@ -198,42 +198,6 @@ export default function DashboardPage() {
           <div className="mb-12">
             {/* Desktop Layout */}
             <div className="hidden md:grid grid-cols-3 gap-6">
-              {/* Share Your Page */}
-              <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-1 group">
-                <CardContent className="p-6 text-center">
-                  <div className="mb-4">
-                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-300 ${
-                      isCopied 
-                        ? 'bg-green-100' 
-                        : 'bg-gradient-to-br from-[#2d3748] to-[#4a5568]'
-                    }`}>
-                      {isCopied ? (
-                        <Check className="h-8 w-8 text-green-600" />
-                      ) : (
-                        <Copy className="h-8 w-8 text-white" />
-                      )}
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold text-[#1a202c] mb-2">
-                    {isCopied ? 'Link Copied!' : 'Share Your Page'}
-                  </h3>
-                  <p className="text-[#718096] text-sm mb-6 leading-relaxed">
-                    {isCopied 
-                      ? 'Your donation link is ready to share with supporters' 
-                      : 'Copy your personalized donation link to share with supporters'
-                    }
-                  </p>
-                  <Button
-                    onClick={copyLink}
-                    disabled={!user?.slug}
-                    variant="outline"
-                    className="w-full border-2 border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white font-semibold rounded-xl transition-all duration-200"
-                  >
-                    {isCopied ? 'Copied!' : 'Copy Link'}
-                  </Button>
-                </CardContent>
-              </Card>
-
               {/* Preview Page */}
               <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-1 group">
                 <CardContent className="p-6 text-center">
@@ -253,6 +217,42 @@ export default function DashboardPage() {
                     className="w-full border-2 border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white font-semibold rounded-xl transition-all duration-200"
                   >
                     View Page
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Share Your Page - Highlighted */}
+              <Card className="bg-gradient-to-br from-[#EC9AA6] to-[#d1707e] border-0 shadow-2xl hover:shadow-3xl transition-all duration-300 hover:-translate-y-1 group ring-2 ring-[#EC9AA6]/30">
+                <CardContent className="p-6 text-center">
+                  <div className="mb-4">
+                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto group-hover:scale-110 transition-all duration-300 ${
+                      isCopied 
+                        ? 'bg-white/20' 
+                        : 'bg-white/10'
+                    }`}>
+                      {isCopied ? (
+                        <Check className="h-8 w-8 text-white" />
+                      ) : (
+                        <Copy className="h-8 w-8 text-white" />
+                      )}
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold text-white mb-2">
+                    {isCopied ? 'Link Copied!' : 'Share Your Page'}
+                  </h3>
+                  <p className="text-white/90 text-sm mb-6 leading-relaxed">
+                    {isCopied 
+                      ? 'Your donation link is ready to share with supporters' 
+                      : 'Copy your personalized donation link to share with supporters'
+                    }
+                  </p>
+                  <Button
+                    onClick={copyLink}
+                    disabled={!user?.slug}
+                    variant="outline"
+                    className="w-full border-2 border-white/80 text-white hover:bg-white/20 hover:border-white font-semibold rounded-xl transition-all duration-200 backdrop-blur-sm bg-white/10"
+                  >
+                    {isCopied ? 'Copied!' : 'Copy Link'}
                   </Button>
                 </CardContent>
               </Card>
@@ -288,11 +288,11 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
                       isCopied 
-                        ? 'bg-green-100' 
+                        ? 'bg-[#EC9AA6]' 
                         : 'bg-gradient-to-br from-[#2d3748] to-[#4a5568]'
                     }`}>
                       {isCopied ? (
-                        <Check className="h-5 w-5 text-green-600" />
+                        <Check className="h-5 w-5 text-white" />
                       ) : (
                         <Copy className="h-5 w-5 text-white" />
                       )}
@@ -307,7 +307,11 @@ export default function DashboardPage() {
                       disabled={!user?.slug}
                       variant="outline"
                       size="sm"
-                      className="border border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white font-medium rounded-lg px-3 py-1.5 text-xs"
+                      className={`font-medium rounded-lg px-3 py-1.5 text-xs transition-all duration-200 ${
+                        isCopied 
+                          ? 'border border-[#EC9AA6] text-[#EC9AA6] bg-[#EC9AA6]/10' 
+                          : 'border border-[#2d3748] text-[#2d3748] hover:bg-[#2d3748] hover:text-white'
+                      }`}
                     >
                       {isCopied ? 'Copied!' : 'Copy'}
                     </Button>
@@ -379,7 +383,7 @@ export default function DashboardPage() {
                         {user?.slug 
                           ? (mounted && typeof window !== 'undefined' 
                               ? `${window.location.origin}/u/${user.slug}` 
-                              : `piggybank.xyz/u/${user.slug}`)
+                              : `piggybanks.xyz/u/${user.slug}`)
                           : 'Loading...'
                         }
                       </div>

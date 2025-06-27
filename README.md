@@ -1,4 +1,4 @@
-# PiggyBank
+# PiggyBanks
 
 A crypto donation platform built with Next.js, Dynamic Labs, and MongoDB.
 
@@ -10,6 +10,10 @@ A crypto donation platform built with Next.js, Dynamic Labs, and MongoDB.
 - 💳 **Smart Donations**: Send any token you own with real-time balance validation
 - 👤 **Custom Profiles**: Create personalized donation pages with custom slugs
 - 📱 **Mobile Optimized**: Responsive design that works on all devices
+
+
+'#EC9AA6' 🐷
+
 
 ## Environment Variables
 

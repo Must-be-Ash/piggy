@@ -7,6 +7,7 @@ import { useAccount } from "wagmi"
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { ButtonShimmer } from "@/components/ui/button-shimmer"
+import { GlassmorphicButton } from "@/components/ui/glassmorphic-button"
 
 export default function CryptoTipLanding() {
   const router = useRouter()
@@ -160,7 +161,7 @@ export default function CryptoTipLanding() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 lg:py-32 bg-[#fdf8f3]">
+      <section className="py-16 lg:py-24 bg-[#fdf8f3]">
         <div className="container mx-auto px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-24">
             {/* Feature 1 */}
@@ -212,7 +213,7 @@ export default function CryptoTipLanding() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-24 lg:py-32 bg-[#fdf8f3]">
+      <section className="py-16 lg:py-16 pb-24 lg:pb-32 bg-[#fdf8f3]">
         <div className="container mx-auto px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -224,15 +225,13 @@ export default function CryptoTipLanding() {
             <p className="text-xl text-[#6b7280] mb-12 max-w-2xl mx-auto">
               Join thousands of creators already earning crypto tips from their community
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.2 }}
+            <GlassmorphicButton
+              variant="accent"
+              size="lg"
               onClick={handleGetStarted}
-              className="bg-black text-white px-12 py-4 rounded-full text-lg font-semibold hover:bg-[#1a1a1a] transition-colors duration-300"
             >
               Get Started
-            </motion.button>
+            </GlassmorphicButton>
           </motion.div>
         </div>
       </section>

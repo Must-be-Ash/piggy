@@ -1,10 +1,10 @@
-# PiggyBank - Crypto Donation Platform
+# PiggyBanks - Crypto Donation Platform
 
 A decentralized "Buy Me a Coffee" clone that allows creators to accept cryptocurrency donations in any token across multiple blockchains. Built with Next.js, Dynamic.xyz SDK, and modern Web3 technologies.
 
 ## 🎯 Project Overview
 
-PiggyBank enables anyone to create a personalized donation page where supporters can send crypto tips using any token in their wallet. The platform is completely non-custodial - donations go directly from supporter to creator without any intermediaries.
+PiggyBanks enables anyone to create a personalized donation page where supporters can send crypto tips using any token in their wallet. The platform is completely non-custodial - donations go directly from supporter to creator without any intermediaries.
 
 ### Key Value Propositions
 

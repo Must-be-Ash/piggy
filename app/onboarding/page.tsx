@@ -350,14 +350,14 @@ export default function OnboardingPage() {
                       </div>
                       <div className="bg-white border border-[#e2e8f0] p-3 rounded-lg">
                         <p className="text-sm font-mono text-[#2d3748] break-all">
-                        piggybank.xyz/u/{displayName ? generateSlug(displayName, address || '') : 'your-username'}
+                        piggybanks.xyz/u/{displayName ? generateSlug(displayName, address || '') : 'your-username'}
                         </p>
                       </div>
                     </div>
 
                     <Button 
                       type="submit" 
-                      className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[#2d3748] to-[#4a5568] hover:from-[#1a202c] hover:to-[#2d3748] rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300" 
+                      className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[#2d3748] to-[#4a5568] hover:from-[#EC9AA6] hover:to-[#EC9AA6] text-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300" 
                       disabled={
                         isLoading || 
                         !displayName.trim() || 

@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
   X, 
-  Wallet, 
+  Globe, 
   ExternalLink, 
   CheckCircle, 
   AlertCircle, 
@@ -116,6 +116,38 @@ const COMMON_TOKENS: Record<number, Array<{ address: string; symbol: string; dec
 }
 
 // Smart presets are now handled by the preset-amounts service
+
+// Add number formatting utility function
+const formatDisplayNumber = (value: string | number): string => {
+  const num = typeof value === 'string' ? parseFloat(value) : value
+  
+  if (isNaN(num)) return '0'
+  
+  // For very large numbers, use abbreviations
+  if (num >= 1_000_000_000) {
+    return `${(num / 1_000_000_000).toFixed(2)}B`
+  }
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(2)}M`
+  }
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(2)}K`
+  }
+  
+  // For small numbers, limit decimal places intelligently
+  if (num < 0.001) {
+    return num.toFixed(8).replace(/\.?0+$/, '')
+  }
+  if (num < 0.01) {
+    return num.toFixed(6).replace(/\.?0+$/, '')
+  }
+  if (num < 1) {
+    return num.toFixed(4).replace(/\.?0+$/, '')
+  }
+  
+  // For numbers >= 1, show up to 2 decimal places
+  return num.toFixed(2).replace(/\.00$/, '')
+}
 
 interface Token {
   address: string
@@ -426,24 +458,22 @@ export function EnhancedDonationModal({
       {/* Background overlay with gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
       
-      {/* Simple Header with Close */}
-      <div className="relative flex items-center justify-end p-4">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="text-white hover:bg-white/10"
-        >
-          <X className="h-5 w-5" />
-        </Button>
-      </div>
-
-      {/* Main content */}
-      <div className="relative flex-1 flex items-center justify-center p-6 min-h-[calc(100vh-80px)]">
+      {/* Main content - adjusted for mobile positioning */}
+      <div className="relative flex-1 flex items-center justify-center p-6 pt-12 sm:pt-6 min-h-screen">
         <div className="w-full max-w-md">
           {/* Connect Wallet Step */}
           {step === "connect" && (
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">
+              {/* Close button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="absolute top-3 right-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
               <CardContent className="p-8 text-center">
                 {/* Recipient Avatar */}
                 <div className="mb-6">
@@ -506,22 +536,34 @@ export function EnhancedDonationModal({
 
           {/* Select Chain Step */}
           {step === "select-chain" && (
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
-              <CardContent className="p-6">
-                {/* Header with back button */}
-                <div className="flex items-center mb-6">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={goToPreviousStep}
-                    className="mr-3 p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <ArrowLeft className="h-4 w-4 text-[#4a5568]" />
-                  </Button>
-                  <div className="flex items-center gap-3 flex-1">
-                    <Avatar className="w-10 h-10 border-2 border-gray-200">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">
+              {/* Back button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToPreviousStep}
+                className="absolute top-3 left-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <ArrowLeft className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
+              {/* Close button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="absolute top-3 right-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
+              <CardContent className="p-6 pt-14">
+                {/* Header without back button */}
+                <div className="flex items-center justify-center mb-6 px-12">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-14 h-14 border-2 border-gray-200">
                       <AvatarImage src={recipient.avatar} alt={recipient.displayName} />
-                      <AvatarFallback className="bg-gradient-to-br from-[#2d3748] to-[#4a5568] text-white text-sm font-bold">
+                      <AvatarFallback className="bg-gradient-to-br from-[#2d3748] to-[#4a5568] text-white text-base font-bold">
                         {recipient.displayName.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
@@ -562,34 +604,50 @@ export function EnhancedDonationModal({
 
           {/* Select Token Step */}
           {step === "select-token" && (
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
-              <CardContent className="p-6">
-                {/* Header with back button */}
-                <div className="flex items-center mb-6">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={goToPreviousStep}
-                    className="mr-3 p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <ArrowLeft className="h-4 w-4 text-[#4a5568]" />
-                  </Button>
-                  <div className="flex items-center gap-3 flex-1">
-                    <Avatar className="w-10 h-10 border-2 border-gray-200">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">
+              {/* Back button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToPreviousStep}
+                className="absolute top-3 left-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <ArrowLeft className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
+              {/* Network badge centered at top */}
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#4a5568] rounded-full">
+                  <Globe className="w-3 h-3 text-white" />
+                  <span className="text-xs font-medium text-white">{selectedChainInfo?.name}</span>
+                </div>
+              </div>
+
+              {/* Close button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="absolute top-3 right-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
+              <CardContent className="p-6 pt-16">
+                {/* Header without back button */}
+                <div className="text-center mb-6">
+                  <div className="flex items-center justify-center gap-3">
+                    <Avatar className="w-14 h-14 border-2 border-gray-200">
                       <AvatarImage src={recipient.avatar} alt={recipient.displayName} />
-                      <AvatarFallback className="bg-gradient-to-br from-[#2d3748] to-[#4a5568] text-white text-sm font-bold">
+                      <AvatarFallback className="bg-gradient-to-br from-[#2d3748] to-[#4a5568] text-white text-base font-bold">
                         {recipient.displayName.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="text-left flex-1">
+                    <div className="text-left">
                       <h2 className="text-lg font-bold text-[#1a202c]">
                         Support {recipient.displayName}
                       </h2>
                       <p className="text-sm text-[#718096]">Select token to donate</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-[#718096]">Network</p>
-                      <p className="text-sm font-semibold text-[#1a202c]">{selectedChainInfo?.name}</p>
                     </div>
                   </div>
                 </div>
@@ -630,7 +688,7 @@ export function EnhancedDonationModal({
                         </div>
                         <div className="text-right">
                           <p className="font-semibold text-[#1a202c]">
-                            {parseFloat(token.balanceFormatted).toFixed(6)}
+                            {formatDisplayNumber(token.balanceFormatted)}
                           </p>
                           <p className="text-sm text-[#718096]">Available</p>
                         </div>
@@ -644,26 +702,38 @@ export function EnhancedDonationModal({
 
           {/* Amount Selection Step */}
           {step === "amount" && selectedToken && (
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
-              <CardContent className="p-6">
-                {/* Header with back button */}
-                <div className="flex items-center mb-6">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={goToPreviousStep}
-                    className="mr-3 p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <ArrowLeft className="h-4 w-4 text-[#4a5568]" />
-                  </Button>
-                  <div className="flex items-center gap-3 flex-1">
-                    <Avatar className="w-10 h-10 border-2 border-gray-200">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">
+              {/* Back button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToPreviousStep}
+                className="absolute top-3 left-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <ArrowLeft className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
+              {/* Close button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="absolute top-3 right-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
+              <CardContent className="p-6 pt-14">
+                {/* Header without back button */}
+                <div className="flex items-center justify-center mb-6 px-12">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-14 h-14 border-2 border-gray-200">
                       <AvatarImage src={recipient.avatar} alt={recipient.displayName} />
-                      <AvatarFallback className="bg-gradient-to-br from-[#2d3748] to-[#4a5568] text-white text-sm font-bold">
+                      <AvatarFallback className="bg-gradient-to-br from-[#2d3748] to-[#4a5568] text-white text-base font-bold">
                         {recipient.displayName.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="text-left flex-1">
+                    <div className="text-left">
                       <h2 className="text-lg font-bold text-[#1a202c]">
                         Support {recipient.displayName}
                       </h2>
@@ -724,7 +794,7 @@ export function EnhancedDonationModal({
                                 </p>
                                 <p className={`text-xs ${hasEnoughFunds ? "text-[#718096]" : "text-gray-400"}`}>
                                   {smartPresets.type === 'usd' ? (
-                                    <>≈ {formatButtonAmount(Number.parseFloat(finalAmount))} {selectedToken.symbol}</>
+                                    <>≈ {formatDisplayNumber(finalAmount)} {selectedToken.symbol}</>
                                   ) : (
                                     <>{displayValue || `${formatButtonAmount(preset)} ${selectedToken.symbol}`}</>
                                   )}
@@ -770,7 +840,7 @@ export function EnhancedDonationModal({
                     <div className="flex justify-between items-center mt-2">
                       <div className="flex flex-col">
                         <p className="text-xs text-[#718096]">
-                          Available: {parseFloat(selectedToken.balanceFormatted).toFixed(6)} {selectedToken.symbol}
+                          Available: {formatDisplayNumber(selectedToken.balanceFormatted)} {selectedToken.symbol}
                         </p>
                         {customAmount && tokenPrice > 0 && (
                           <p className="text-xs text-[#4a5568] font-semibold">
@@ -800,7 +870,7 @@ export function EnhancedDonationModal({
                     disabled={!customAmount || Number.parseFloat(customAmount) <= 0}
                     className="w-full h-12 bg-gradient-to-r from-[#2d3748] to-[#4a5568] hover:from-[#1a202c] hover:to-[#2d3748] text-white font-semibold rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Continue with {customAmount || "0"} {selectedToken.symbol}
+                    Continue with {customAmount ? formatDisplayNumber(customAmount) : "0"} {selectedToken.symbol}
                   </Button>
                 </div>
               </CardContent>
@@ -809,26 +879,38 @@ export function EnhancedDonationModal({
 
           {/* Confirm Step */}
           {step === "confirm" && selectedToken && amount && (
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
-              <CardContent className="p-6">
-                {/* Header with back button */}
-                <div className="flex items-center mb-6">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={goToPreviousStep}
-                    className="mr-3 p-2 hover:bg-gray-100 rounded-lg"
-                  >
-                    <ArrowLeft className="h-4 w-4 text-[#4a5568]" />
-                  </Button>
-                  <div className="flex items-center gap-3 flex-1">
-                    <Avatar className="w-10 h-10 border-2 border-gray-200">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">
+              {/* Back button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={goToPreviousStep}
+                className="absolute top-3 left-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <ArrowLeft className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
+              {/* Close button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="absolute top-3 right-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
+              <CardContent className="p-6 pt-14">
+                {/* Header without back button */}
+                <div className="flex items-center justify-center mb-6 px-12">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-12 h-12 border-2 border-gray-200">
                       <AvatarImage src={recipient.avatar} alt={recipient.displayName} />
-                      <AvatarFallback className="bg-gradient-to-br from-[#2d3748] to-[#4a5568] text-white text-sm font-bold">
+                      <AvatarFallback className="bg-gradient-to-br from-[#2d3748] to-[#4a5568] text-white text-base font-bold">
                         {recipient.displayName.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="text-left flex-1">
+                    <div className="text-left">
                       <h2 className="text-lg font-bold text-[#1a202c]">
                         Support {recipient.displayName}
                       </h2>
@@ -861,7 +943,7 @@ export function EnhancedDonationModal({
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-[#718096]">Amount:</span>
                       <div className="text-right">
-                        <span className="font-bold text-[#1a202c] text-lg">{amount} {selectedToken.symbol}</span>
+                        <span className="font-bold text-[#1a202c] text-lg">{formatDisplayNumber(amount)} {selectedToken.symbol}</span>
                         {tokenPrice > 0 && (
                           <p className="text-xs text-[#718096]">
                             ≈ ${(Number.parseFloat(amount) * tokenPrice).toFixed(2)} USD
@@ -911,7 +993,17 @@ export function EnhancedDonationModal({
 
           {/* Processing Step */}
           {step === "processing" && (
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">
+              {/* Close button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="absolute top-3 right-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
               <CardContent className="p-8 text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#2d3748] to-[#4a5568] rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Loader2 className="h-10 w-10 text-white animate-spin" />
@@ -935,7 +1027,17 @@ export function EnhancedDonationModal({
 
           {/* Success Step */}
           {step === "success" && (
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">
+              {/* Close button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="absolute top-3 right-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
               <CardContent className="p-8 text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <CheckCircle className="h-10 w-10 text-white" />
@@ -945,7 +1047,7 @@ export function EnhancedDonationModal({
                   Donation Sent! 🎉
                 </h2>
                 <p className="text-[#718096] mb-6">
-                  Your {amount} {selectedToken?.symbol} donation to {recipient.displayName} has been successfully sent!
+                  Your {formatDisplayNumber(amount)} {selectedToken?.symbol} donation to {recipient.displayName} has been successfully sent!
                 </p>
                 
                 {txHash && (
@@ -991,7 +1093,17 @@ export function EnhancedDonationModal({
 
           {/* Error Step */}
           {step === "error" && (
-            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl">
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">
+              {/* Close button on modal */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="absolute top-3 right-3 text-[#4a5568] hover:text-[#2d3748] hover:bg-gray-100 z-10"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </Button>
+              
               <CardContent className="p-8 text-center">
                 <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <AlertCircle className="h-10 w-10 text-white" />

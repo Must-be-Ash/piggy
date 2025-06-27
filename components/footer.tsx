@@ -11,7 +11,7 @@ export function Footer() {
           href="https://x.com/Must_be_Ash" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="transition-colors duration-200"
+          className="transition-all duration-200 hover:font-bold"
           style={{ color: '#EC9AA6' }}
         >
           @must_be_ash

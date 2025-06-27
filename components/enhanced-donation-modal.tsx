@@ -536,13 +536,13 @@ export function EnhancedDonationModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#2d3748] via-[#4a5568] to-[#1a202c] overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#2d3748] via-[#4a5568] to-[#1a202c] overflow-y-auto">
       {/* Background overlay with gradient */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
       
       {/* Main content - adjusted for mobile positioning */}
-      <div className="relative flex-1 flex items-center justify-center p-6 pt-12 sm:pt-6 min-h-screen">
-        <div className="w-full max-w-md">
+      <div className="relative flex-1 flex items-start justify-center p-6 pt-12 sm:pt-6 min-h-screen">
+        <div className="w-full max-w-md my-auto">
           {/* Connect Wallet Step */}
           {step === "connect" && (
             <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-2xl relative">

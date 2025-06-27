@@ -2,9 +2,6 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Snout } from '@/components/ui/snout'
 
-// Force dynamic rendering to prevent SSG issues with wagmi
-export const dynamic = 'force-dynamic'
-
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 flex items-center justify-center">

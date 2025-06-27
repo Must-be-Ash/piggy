@@ -3,6 +3,9 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
+
+// Force dynamic rendering to prevent SSG issues with wagmi
+export const dynamic = 'force-dynamic'
 import { useRouter } from "next/navigation"
 import { useAccount } from "wagmi"
 import { Button } from "@/components/ui/button"

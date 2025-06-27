@@ -12,6 +12,7 @@ export interface IUser extends Document {
   
   // Social links (optional)
   twitter?: string
+  farcaster?: string
   github?: string
   website?: string
   
@@ -62,6 +63,11 @@ const UserSchema = new Schema<IUser>({
     type: String,
     trim: true,
     maxlength: 100
+  },
+  farcaster: {
+    type: String,
+    trim: true,
+    maxlength: 200
   },
   github: {
     type: String,

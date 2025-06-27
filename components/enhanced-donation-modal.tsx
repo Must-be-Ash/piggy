@@ -191,6 +191,9 @@ export function EnhancedDonationModal({
   const { switchChain } = useSwitchChain()
   const { toast } = useToast()
 
+  // Get chain info early for use in effects
+  const selectedChainInfo = SUPPORTED_CHAINS.find(c => c.id === selectedChain)
+
   // Get native balance for the selected chain
   const { data: nativeBalance } = useBalance({
     address,
@@ -280,6 +283,20 @@ export function EnhancedDonationModal({
       setStep("connect")
     }
   }, [isConnected])
+
+  // Auto-detect when user switches to correct network
+  useEffect(() => {
+    if (step === "error" && chain?.id === selectedChain && 
+        (error.includes("manually switch") || error.includes("correct network"))) {
+      console.log(`🎉 Auto-detected correct network switch! Chain: ${chain.id}`)
+      setError("")
+      setStep("confirm")
+      toast({
+        title: "Network detected! 🎉",
+        description: `You're now on ${selectedChainInfo?.name}. Ready to donate!`,
+      })
+    }
+  }, [chain?.id, selectedChain, step, error, selectedChainInfo])
 
   // Show token detection errors
   useEffect(() => {
@@ -373,6 +390,15 @@ export function EnhancedDonationModal({
     else if (step === "success" || step === "error") onClose()
   }
 
+  const handleRetryTransaction = () => {
+    // Clear all error states and return to confirm step
+    setError("")
+    setTxHash("")
+    setStep("confirm")
+    
+    console.log("🔄 Retrying transaction - error cleared, returned to confirm step")
+  }
+
   const handleDonate = async () => {
     if (!selectedToken || !amount || !address) return
 
@@ -380,6 +406,13 @@ export function EnhancedDonationModal({
     const amountNum = Number.parseFloat(amount)
     if (!validateFunds(amountNum)) {
       setStep("confirm") // Go back to confirm step to show error
+      return
+    }
+
+    // Check if wallet is on the correct chain before processing
+    if (chain?.id !== selectedChain) {
+      setError(`Please manually switch your wallet to ${selectedChainInfo?.name} to complete this donation.`)
+      setStep("error")
       return
     }
 
@@ -406,7 +439,24 @@ export function EnhancedDonationModal({
           },
           onError: (error: any) => {
             console.error("Native donation failed:", error)
-            setError(error.message || "Transaction failed")
+            
+            // Check for various error types
+            const errorMessage = error.message || error.toString() || ""
+            
+            if (errorMessage.toLowerCase().includes("user rejected") || 
+                errorMessage.toLowerCase().includes("user denied") ||
+                errorMessage.toLowerCase().includes("user cancelled") ||
+                errorMessage.toLowerCase().includes("user canceled") ||
+                errorMessage.toLowerCase().includes("rejected by user") ||
+                errorMessage.toLowerCase().includes("denied by user")) {
+              setError("Transaction was cancelled. No funds were sent.")
+            } else if (errorMessage.includes("does not match the target chain") || 
+                       errorMessage.includes("wrong chain") ||
+                       errorMessage.includes("chain mismatch")) {
+              setError(`Please manually switch your wallet to ${selectedChainInfo?.name} to complete this donation.`)
+            } else {
+              setError("Transaction failed. Please check your wallet and try again.")
+            }
             setStep("error")
           }
         })
@@ -429,14 +479,48 @@ export function EnhancedDonationModal({
           },
           onError: (error: any) => {
             console.error("Token donation failed:", error)
-            setError(error.message || "Transaction failed")
+            
+            // Check for various error types
+            const errorMessage = error.message || error.toString() || ""
+            
+            if (errorMessage.toLowerCase().includes("user rejected") || 
+                errorMessage.toLowerCase().includes("user denied") ||
+                errorMessage.toLowerCase().includes("user cancelled") ||
+                errorMessage.toLowerCase().includes("user canceled") ||
+                errorMessage.toLowerCase().includes("rejected by user") ||
+                errorMessage.toLowerCase().includes("denied by user")) {
+              setError("Transaction was cancelled. No funds were sent.")
+            } else if (errorMessage.includes("does not match the target chain") || 
+                       errorMessage.includes("wrong chain") ||
+                       errorMessage.includes("chain mismatch")) {
+              setError(`Please manually switch your wallet to ${selectedChainInfo?.name} to complete this donation.`)
+            } else {
+              setError("Transaction failed. Please check your wallet and try again.")
+            }
             setStep("error")
           }
         })
       }
     } catch (error: any) {
       console.error("Donation failed:", error)
-      setError(error.message || "Transaction failed")
+      
+      // Check for various error types
+      const errorMessage = error.message || error.toString() || ""
+      
+      if (errorMessage.toLowerCase().includes("user rejected") || 
+          errorMessage.toLowerCase().includes("user denied") ||
+          errorMessage.toLowerCase().includes("user cancelled") ||
+          errorMessage.toLowerCase().includes("user canceled") ||
+          errorMessage.toLowerCase().includes("rejected by user") ||
+          errorMessage.toLowerCase().includes("denied by user")) {
+        setError("Transaction was cancelled. No funds were sent.")
+      } else if (errorMessage.includes("does not match the target chain") || 
+                 errorMessage.includes("wrong chain") ||
+                 errorMessage.includes("chain mismatch")) {
+        setError(`Please manually switch your wallet to ${selectedChainInfo?.name} to complete this donation.`)
+      } else {
+        setError("Transaction failed. Please check your wallet and try again.")
+      }
       setStep("error")
     }
   }
@@ -450,8 +534,6 @@ export function EnhancedDonationModal({
       })
     }
   }
-
-  const selectedChainInfo = SUPPORTED_CHAINS.find(c => c.id === selectedChain)
 
   return (
     <div className="fixed inset-0 z-50 bg-gradient-to-br from-[#2d3748] via-[#4a5568] to-[#1a202c] overflow-hidden">
@@ -970,6 +1052,33 @@ export function EnhancedDonationModal({
                   </div>
                 )}
 
+                {/* Show current vs required network info for chain mismatch */}
+                {(error.includes("manually switch") || error.includes("correct network")) && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <div className="flex items-center justify-between text-sm mb-4">
+                      <div className="text-left">
+                        <p className="text-blue-800 font-semibold">Current Network:</p>
+                        <p className="text-blue-600">{chain?.name || "Unknown"}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-blue-800 font-semibold">Required Network:</p>
+                        <p className="text-blue-600">{selectedChainInfo?.name || "Unknown"}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Always show manual instructions for network switching */}
+                    <div className="pt-4 border-t border-blue-200">
+                      <p className="text-xs text-blue-700 font-semibold mb-2">How to switch networks:</p>
+                      <ol className="text-xs text-blue-600 space-y-1">
+                        <li>1. Open your wallet</li>
+                        <li>2. Look for the network selector (usually at the top)</li>
+                        <li>3. Select "{selectedChainInfo?.name}"</li>
+                        <li>4. Come back and click "Retry Transaction"</li>
+                      </ol>
+                    </div>
+                  </div>
+                )}
+
                 <Button
                   onClick={handleDonate}
                   disabled={isSendingNative || isSendingToken || !!error}
@@ -1105,23 +1214,61 @@ export function EnhancedDonationModal({
               </Button>
               
               <CardContent className="p-8 text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 ${
+                  error.includes("cancelled") || error.includes("canceled")
+                    ? "bg-gradient-to-br from-orange-500 to-orange-600"
+                    : error.includes("manually switch") || error.includes("correct network")
+                    ? "bg-gradient-to-br from-blue-500 to-blue-600"
+                    : "bg-gradient-to-br from-red-500 to-red-600"
+                }`}>
                   <AlertCircle className="h-10 w-10 text-white" />
                 </div>
                 
                 <h2 className="text-2xl font-bold text-[#1a202c] mb-3">
-                  Transaction Failed
+                  {error.includes("cancelled") || error.includes("canceled")
+                    ? "Transaction Cancelled"
+                    : error.includes("manually switch") || error.includes("correct network")
+                    ? "Wrong Network"
+                    : "Transaction Failed"
+                  }
                 </h2>
                 <p className="text-[#718096] mb-6">
-                  {error || "Something went wrong while processing your donation. Please try again."}
+                  {error}
                 </p>
+                
+                {/* Show current vs required network info for chain mismatch */}
+                {(error.includes("manually switch") || error.includes("correct network")) && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+                    <div className="flex items-center justify-between text-sm mb-4">
+                      <div className="text-left">
+                        <p className="text-blue-800 font-semibold">Current Network:</p>
+                        <p className="text-blue-600">{chain?.name || "Unknown"}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-blue-800 font-semibold">Required Network:</p>
+                        <p className="text-blue-600">{selectedChainInfo?.name || "Unknown"}</p>
+                      </div>
+                    </div>
+                    
+                    {/* Always show manual instructions for network switching */}
+                    <div className="pt-4 border-t border-blue-200">
+                      <p className="text-xs text-blue-700 font-semibold mb-2">How to switch networks:</p>
+                      <ol className="text-xs text-blue-600 space-y-1">
+                        <li>1. Open your wallet</li>
+                        <li>2. Look for the network selector (usually at the top)</li>
+                        <li>3. Select "{selectedChainInfo?.name}"</li>
+                        <li>4. Come back and click "Retry Transaction"</li>
+                      </ol>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="space-y-3">
                   <Button
-                    onClick={() => setStep("confirm")}
+                    onClick={handleRetryTransaction}
                     className="w-full h-12 bg-gradient-to-r from-[#2d3748] to-[#4a5568] hover:from-[#1a202c] hover:to-[#2d3748] text-white font-semibold rounded-xl"
                   >
-                    Try Again
+                    Retry Transaction
                   </Button>
                   
                   <Button

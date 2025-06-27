@@ -65,17 +65,17 @@ const GlassmorphicButton = forwardRef<HTMLButtonElement, GlassmorphicButtonProps
           `bg-gradient-to-br ${variantClasses[variant]}`,
           // Enhanced glass effect
           "shadow-xl",
-          // Enhanced shimmer effect
-          "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-1000 before:ease-in-out before:z-20",
-          // Inner highlight with 3D bevel
-          "after:absolute after:inset-[1px] after:rounded-2xl after:bg-gradient-to-b after:from-white/40 after:via-white/10 after:to-black/5 after:opacity-80",
+          // Continuous gentle shimmer effect - more visible
+          "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent before:translate-x-[-100%] before:animate-gentle-shimmer before:z-20",
+          // Enhanced shimmer on hover
+          "after:absolute after:inset-0 after:rounded-2xl after:bg-gradient-to-r after:from-transparent after:via-white/70 after:to-transparent after:translate-x-[-100%] hover:after:translate-x-[100%] after:transition-transform after:duration-1000 after:ease-in-out after:z-30 after:opacity-0 hover:after:opacity-100",
           // Size
           sizeClasses[size],
           // Smooth transitions
           "transition-all duration-200 ease-out",
           className
         )}
-                style={{
+        style={{
           boxShadow: variant === "accent" 
             ? "0 8px 25px rgba(0, 0, 0, 0.15), 0 12px 40px rgba(236, 154, 166, 0.4), 0 4px 12px rgba(236, 154, 166, 0.3), inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -2px 0 rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.2)"
             : "0 8px 25px rgba(0, 0, 0, 0.2), 0 12px 40px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 2px 0 rgba(255, 255, 255, 0.5), inset 0 -2px 0 rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(255, 255, 255, 0.2)",
@@ -85,17 +85,15 @@ const GlassmorphicButton = forwardRef<HTMLButtonElement, GlassmorphicButtonProps
          disabled={disabled}
          type={type}
        >
-        {/* Additional shimmer for accent variant */}
+        {/* Additional gentle shimmer for accent variant - more visible */}
         {variant === "accent" && (
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-[#EC9AA6]/40 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-all duration-1000 ease-in-out z-10 opacity-0 group-hover:opacity-100" />
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-[#EC9AA6]/35 to-transparent translate-x-[-100%] animate-gentle-shimmer-accent z-10" />
         )}
         
         {/* Content wrapper for proper layering */}
-        <span className="relative z-30 flex items-center justify-center gap-2">
+        <span className="relative z-40 flex items-center justify-center gap-2">
           {children}
         </span>
-        
-
       </motion.button>
     )
   }

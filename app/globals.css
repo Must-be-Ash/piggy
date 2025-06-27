@@ -55,9 +55,48 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Gentle shimmer animations for glassmorphic buttons */
+@keyframes gentle-shimmer {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes gentle-shimmer-accent {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  
+  .animate-gentle-shimmer {
+    animation: gentle-shimmer 4s ease-in-out infinite;
+    animation-delay: 1s;
+  }
+  
+  .animate-gentle-shimmer-accent {
+    animation: gentle-shimmer-accent 5s ease-in-out infinite;
+    animation-delay: 2s;
   }
 }
 

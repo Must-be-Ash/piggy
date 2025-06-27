@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ExternalLink, Users, Shield, Zap, User } from "lucide-react"
 import { Snout } from "@/components/ui/snout"
+import { SiFarcaster } from "react-icons/si"
 import { useAccount } from "wagmi"
 import { Header } from "@/components/header"
 import { DonateButton } from "@/components/donate-button"
@@ -19,6 +20,8 @@ interface User {
   avatar?: string
   slug: string
   createdAt: string
+  twitter?: string
+  farcaster?: string
 }
 
 interface DonationPageProps {
@@ -86,7 +89,7 @@ function DonationPageContent({ user }: DonationPageProps) {
               </div>
 
               {/* Wallet Info */}
-              <div className="flex items-center justify-center gap-3 py-4">
+              <div className="flex items-center justify-center gap-3 py-1">
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
                   <Shield className="h-4 w-4 text-green-400" />
                   <span className="text-sm font-medium">Verified Wallet</span>
@@ -103,6 +106,37 @@ function DonationPageContent({ user }: DonationPageProps) {
                   </Button>
                 </div>
               </div>
+
+              {/* Social Links */}
+              {!mounted || !isOwnPage ? (
+                /* Show social links for visitors */
+                (user.twitter || user.farcaster) && (
+                  <div className="flex items-center justify-center gap-3 py-2">
+                    {user.twitter && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-3 bg-white/10 hover:bg-[#EC9AA6] text-white border border-white/20 hover:border-white/30 transition-all duration-200"
+                        onClick={() => window.open(user.twitter, "_blank")}
+                      >
+                        <span className="mr-2">𝕏</span>
+                        <span className="text-sm">Twitter</span>
+                      </Button>
+                    )}
+                    {user.farcaster && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-3 bg-white/10 hover:bg-[#EC9AA6] text-white border border-white/20 hover:border-white/30 transition-all duration-200"
+                        onClick={() => window.open(user.farcaster, "_blank")}
+                      >
+                        <SiFarcaster className="h-4 w-4 mr-2 text-current" />
+                        <span className="text-sm">Farcaster</span>
+                      </Button>
+                    )}
+                  </div>
+                )
+              ) : null}
 
               {/* Action Buttons */}
               <div className="pt-8">
@@ -225,6 +259,34 @@ export function DonationPage({ user }: DonationPageProps) {
                     </Button>
                   </div>
                 </div>
+
+                {/* Social Links */}
+                {(user.twitter || user.farcaster) && (
+                  <div className="flex items-center justify-center gap-3 py-2">
+                    {user.twitter && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-3 bg-white/10 hover:bg-[white/20] text-white border border-white/20 hover:border-white/30 transition-all duration-200"
+                        onClick={() => window.open(user.twitter, "_blank")}
+                      >
+                        <span className="mr-2">𝕏</span>
+                        <span className="text-sm">Twitter</span>
+                      </Button>
+                    )}
+                    {user.farcaster && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 transition-all duration-200"
+                        onClick={() => window.open(user.farcaster, "_blank")}
+                      >
+                        <SiFarcaster className="h-4 w-4 mr-2 text-current" />
+                        <span className="text-sm">Farcaster</span>
+                      </Button>
+                    )}
+                  </div>
+                )}
 
                 {/* Donation Button (always show for non-wallet users) */}
                 <div className="pt-8">

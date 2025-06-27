@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { Heart, Gift } from "lucide-react"
 import { Snout } from "@/components/ui/snout"
+import { GlassmorphicButton } from "@/components/ui/glassmorphic-button"
 import { EnhancedDonationModal } from "./enhanced-donation-modal"
 
 interface DonationRecipient {
@@ -44,7 +44,7 @@ export function DonateButton({
         return (
           <>
             <Heart className="h-4 w-4 mr-2" />
-            Support me
+            tip {recipient.displayName}
           </>
         )
       case "gift":
@@ -59,30 +59,31 @@ export function DonateButton({
     }
   }
 
-  const getButtonClasses = () => {
-    const baseClasses = "bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
-    
-    switch (variant) {
-      case "coffee":
-        return "bg-amber-600 hover:bg-amber-700 text-white font-medium transition-colors"
-      case "heart":
-        return "bg-pink-600 hover:bg-pink-700 text-white font-medium transition-colors"
-      case "gift":
-        return "bg-green-600 hover:bg-green-700 text-white font-medium transition-colors"
+  // Map DonateButton sizes to GlassmorphicButton sizes
+  const getGlassmorphicSize = () => {
+    switch (size) {
+      case "sm":
+        return "sm"
+      case "lg":
+        return "lg"
       default:
-        return baseClasses
+        return "md"
     }
   }
 
+  // Use accent variant for the glassmorphic button to make it stand out
+  const glassmorphicVariant = variant === "heart" ? "accent" : "default"
+
   return (
     <>
-      <Button
+      <GlassmorphicButton
         onClick={() => setIsModalOpen(true)}
-        size={size}
-        className={`${getButtonClasses()} ${className}`}
+        size={getGlassmorphicSize()}
+        variant={glassmorphicVariant}
+        className={className}
       >
         {getButtonContent()}
-      </Button>
+      </GlassmorphicButton>
 
       {isModalOpen && (
         <EnhancedDonationModal

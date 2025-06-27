@@ -22,6 +22,8 @@ export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState("")
   const [bio, setBio] = useState("")
   const [avatar, setAvatar] = useState<string | null>(null)
+  const [twitter, setTwitter] = useState("")
+  const [farcaster, setFarcaster] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
@@ -71,6 +73,8 @@ export default function OnboardingPage() {
           setDisplayName(user.displayName || "")
           setBio(user.bio || "")
           setAvatar(user.avatar || null)
+          setTwitter(user.twitter || "")
+          setFarcaster(user.farcaster || "")
           setIsEditing(true)
         }
       } catch (error) {
@@ -171,6 +175,8 @@ export default function OnboardingPage() {
             displayName: displayName.trim(),
             bio: bio.trim(),
             avatar: avatar,
+            twitter: twitter.trim(),
+            farcaster: farcaster.trim(),
           }),
         })
         successMessage = "Profile updated! 🎉"
@@ -186,6 +192,8 @@ export default function OnboardingPage() {
             displayName: displayName.trim(),
             bio: bio.trim(),
             avatar: avatar,
+            twitter: twitter.trim(),
+            farcaster: farcaster.trim(),
             slug,
           }),
         })
@@ -338,6 +346,52 @@ export default function OnboardingPage() {
                         <span className="text-sm text-[#718096] font-mono">
                           {bio.length}/500
                         </span>
+                      </div>
+                    </div>
+
+                    {/* Social Profiles Section */}
+                    <div className="space-y-4">
+                      <div className="border-t border-[#e2e8f0] pt-6">
+                        <h3 className="text-lg font-semibold text-[#1a202c] mb-4">Social Profiles (Optional)</h3>
+                        <p className="text-sm text-[#718096] mb-4">
+                          Add your social profiles to help supporters connect with you. Enter full profile URLs.
+                        </p>
+                        
+                        <div className="space-y-4">
+                          <div className="space-y-3">
+                            <Label htmlFor="twitter" className="text-base font-semibold text-[#1a202c]">
+                              Twitter/X Profile URL
+                            </Label>
+                            <Input
+                              id="twitter"
+                              placeholder="https://twitter.com/yourusername or https://x.com/yourusername"
+                              value={twitter}
+                              onChange={(e) => setTwitter(e.target.value)}
+                              type="url"
+                              className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
+                            />
+                            <p className="text-xs text-[#718096]">
+                              Example: https://twitter.com/yourusername or https://x.com/yourusername
+                            </p>
+                          </div>
+
+                          <div className="space-y-3">
+                            <Label htmlFor="farcaster" className="text-base font-semibold text-[#1a202c]">
+                              Farcaster Profile URL
+                            </Label>
+                            <Input
+                              id="farcaster"
+                              placeholder="https://warpcast.com/yourusername"
+                              value={farcaster}
+                              onChange={(e) => setFarcaster(e.target.value)}
+                              type="url"
+                              className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
+                            />
+                            <p className="text-xs text-[#718096]">
+                              Example: https://warpcast.com/yourusername
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
 

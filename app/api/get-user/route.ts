@@ -65,7 +65,7 @@ export async function PUT(request: NextRequest) {
     }
     
     // Fields that can be updated
-    const allowedUpdates = ['displayName', 'bio', 'avatar', 'twitter', 'github', 'website', 'preferredCurrency', 'minDonationAmount']
+    const allowedUpdates = ['displayName', 'bio', 'avatar', 'twitter', 'farcaster', 'github', 'website', 'preferredCurrency', 'minDonationAmount']
     const updates: Record<string, unknown> = {}
     
     // Filter and validate updates

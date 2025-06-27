@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { useAccount } from "wagmi"
+import { useAccount, useConfig } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -17,6 +17,7 @@ import { AuthModal } from "@/components/auth-modal"
 import { Header } from "@/components/header"
 import { LoadingState } from "@/components/loading-state"
 import { AvatarUpload } from "@/components/avatar-upload"
+import { useAuthenticatedApi } from "@/hooks/use-authenticated-api"
 
 export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState("")
@@ -36,6 +37,7 @@ export default function OnboardingPage() {
   const { address, isConnected } = useAccount()
   const router = useRouter()
   const { toast } = useToast()
+  const { updateUser } = useAuthenticatedApi()
 
   const generateSlug = (name: string, address: string) => {
     if (name && name.trim()) {
@@ -165,20 +167,17 @@ export default function OnboardingPage() {
       let successMessage = "Profile created! 🎉"
       
       if (checkResponse.ok) {
-        // User exists, update them
-        response = await fetch(`/api/get-user?address=${address}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            displayName: displayName.trim(),
-            bio: bio.trim(),
-            avatar: avatar,
-            twitter: twitter.trim(),
-            farcaster: farcaster.trim(),
-          }),
-        })
+        // User exists, update them - use authenticated API
+        const updateData = {
+          displayName: displayName.trim(),
+          bio: bio.trim(),
+          avatar: avatar,
+          twitter: twitter.trim(),
+          farcaster: farcaster.trim(),
+        }
+        
+        const result = await updateUser(address, updateData)
+        response = { ok: true, json: async () => result }
         successMessage = "Profile updated! 🎉"
       } else {
         // User doesn't exist, create them

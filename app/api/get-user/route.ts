@@ -63,6 +63,17 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       )
     }
+
+    // SECURITY: Verify wallet ownership before allowing updates
+    const { verifyWalletOwnership } = await import('@/lib/auth-middleware')
+    const authResult = await verifyWalletOwnership(request, address)
+    
+    if (!authResult.isValid) {
+      return NextResponse.json(
+        { error: authResult.error || 'Unauthorized' },
+        { status: 401 }
+      )
+    }
     
     // Fields that can be updated
     const allowedUpdates = ['displayName', 'bio', 'avatar', 'twitter', 'farcaster', 'github', 'website', 'preferredCurrency', 'minDonationAmount']
@@ -166,6 +177,17 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json(
         { error: 'Address parameter is required for deletion' },
         { status: 400 }
+      )
+    }
+
+    // SECURITY: Verify wallet ownership before allowing deletion
+    const { verifyWalletOwnership } = await import('@/lib/auth-middleware')
+    const authResult = await verifyWalletOwnership(request, address)
+    
+    if (!authResult.isValid) {
+      return NextResponse.json(
+        { error: authResult.error || 'Unauthorized' },
+        { status: 401 }
       )
     }
     

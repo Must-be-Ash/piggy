@@ -137,7 +137,7 @@ export default function CryptoTipLanding() {
               transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
               className="text-xl lg:text-2xl text-white/70 max-w-2xl leading-relaxed font-cormorant font-light mb-12"
             >
-              receive donations and tips from people<br />
+              receive tips and donations from people<br />
               all around the world on any EVM chain
             </motion.p>
             

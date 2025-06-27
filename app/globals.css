@@ -98,6 +98,10 @@ body {
     animation: gentle-shimmer-accent 5s ease-in-out infinite;
     animation-delay: 2s;
   }
+  
+  .animation-delay-1000 {
+    animation-delay: 1000ms;
+  }
 }
 
 @layer base {

@@ -11,6 +11,7 @@ import { useAccount } from "wagmi"
 import { Header } from "@/components/header"
 import { DonateButton } from "@/components/donate-button"
 import { CopyLinkButton, ShareButton } from "@/components/copy-link-button"
+import { ButtonShimmer } from "@/components/ui/button-shimmer"
 
 interface User {
   id: string
@@ -53,10 +54,10 @@ function DonationPageContent({ user }: DonationPageProps) {
       <Header />
 
       {/* Main Section */}
-      <div className="relative text-white overflow-hidden min-h-[calc(100vh-80px)]">
+      <div className="relative text-white overflow-hidden min-h-[calc(100vh-80px)] flex flex-col">
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
         
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex items-center justify-center min-h-[calc(100vh-80px)]">
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex items-center justify-center flex-1">
           <div className="text-center">
             {/* Profile Avatar */}
             <div className="relative mb-8">
@@ -190,6 +191,32 @@ function DonationPageContent({ user }: DonationPageProps) {
             </div>
           </div>
         </div>
+
+        {/* Watermark for non-connected users */}
+        {mounted && !address && (
+          <div className="relative mt-auto pb-16">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6">
+              <div className="text-center space-y-4">
+                <ButtonShimmer
+                  size="sm"
+                  onClick={() => window.location.href = '/onboarding'}
+                  className="text-white"
+                >
+                  Create your own donation page
+                </ButtonShimmer>
+                <p className="text-sm text-gray-400">
+                  Powered by{" "}
+                  <button 
+                    onClick={() => window.open('https://piggybanks.xyz', '_blank')}
+                    className="font-semibold text-white hover:text-[#EC9AA6] transition-colors underline cursor-pointer"
+                  >
+                    piggybanks.xyz
+                  </button>
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -206,10 +233,10 @@ export function DonationPage({ user }: DonationPageProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#2d3748] via-[#4a5568] to-[#1a202c]">
         <Header />
-        <div className="relative text-white overflow-hidden min-h-[calc(100vh-80px)]">
+        <div className="relative text-white overflow-hidden min-h-[calc(100vh-80px)] flex flex-col">
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
           
-          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex items-center justify-center min-h-[calc(100vh-80px)]">
+          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24 flex items-center justify-center flex-1">
             <div className="text-center">
               {/* Profile Avatar */}
               <div className="relative mb-8">
@@ -303,6 +330,30 @@ export function DonationPage({ user }: DonationPageProps) {
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Watermark for non-connected users */}
+          <div className="relative mt-auto pb-16">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6">
+              <div className="text-center space-y-4">
+                <ButtonShimmer
+                  size="sm"
+                  onClick={() => window.location.href = '/onboarding'}
+                  className="text-white"
+                >
+                  Create your own donation page
+                </ButtonShimmer>
+                <p className="text-sm text-gray-400">
+                  Powered by{" "}
+                  <button 
+                    onClick={() => window.open('https://piggybanks.xyz', '_blank')}
+                    className="font-semibold text-white hover:text-[#EC9AA6] transition-colors underline cursor-pointer"
+                  >
+                    piggybanks.xyz
+                  </button>
+                </p>
               </div>
             </div>
           </div>

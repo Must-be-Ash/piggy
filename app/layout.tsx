@@ -23,10 +23,10 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "PiggyBack - Get Tips In Any Tokens",
+  title: "PiggyBank - Get Tips In Any Tokens",
   description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
   keywords: "tips, crypto donations, cryptocurrency tips, crypto tipping, donation page, web3 donations, accept crypto, bitcoin donations, ethereum donations",
-  authors: [{ name: "PiggyBack" }],
+  authors: [{ name: "PiggyBank" }],
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   openGraph: {
-    title: "PiggyBack - Get Tips In Any Tokens",
+    title: "PiggyBank - Get Tips In Any Tokens",
     description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
     url: "https://piggybanks.xyz/",
     type: "website",
@@ -55,17 +55,17 @@ export const metadata: Metadata = {
         url: "https://piggybanks.xyz/og.png",
         width: 1200,
         height: 630,
-        alt: "PiggyBack - Get Tips In Any Tokens"
+        alt: "PiggyBank - Get Tips In Any Tokens"
       },
     ],
-    siteName: "PiggyBack",
+    siteName: "PiggyBank",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PiggyBack - Get Tips In Any Tokens",
+    title: "PiggyBank - Get Tips In Any Tokens",
     description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
     images: ["https://piggybanks.xyz/og.png"],
-    creator: "@piggybackapp",
+    creator: "@must_be_must",
   },
   robots: {
     index: true,

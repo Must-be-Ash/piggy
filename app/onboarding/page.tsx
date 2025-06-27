@@ -350,7 +350,7 @@ export default function OnboardingPage() {
                       </div>
                       <div className="bg-white border border-[#e2e8f0] p-3 rounded-lg">
                         <p className="text-sm font-mono text-[#2d3748] break-all">
-                          PiggyBack.app/u/{displayName ? generateSlug(displayName, address || '') : 'your-username'}
+                        piggybank.xyz/u/{displayName ? generateSlug(displayName, address || '') : 'your-username'}
                         </p>
                       </div>
                     </div>

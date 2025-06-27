@@ -1,4 +1,4 @@
-# PiggyBack
+# PiggyBank
 
 A crypto donation platform built with Next.js, Dynamic Labs, and MongoDB.
 
@@ -20,7 +20,7 @@ Create a `.env.local` file in the root directory with the following variables:
 NEXT_PUBLIC_DYNAMIC_ENVIRONMENT_ID=your_dynamic_environment_id
 
 # MongoDB Configuration
-MONGODB_URI=mongodb://localhost:27017/PiggyBack
+MONGODB_URI=mongodb://localhost:27017/PiggyBank
 
 # Alchemy Configuration (for dynamic token detection)
 NEXT_PUBLIC_ALCHEMY_API_KEY=your_alchemy_api_key

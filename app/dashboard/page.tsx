@@ -379,7 +379,7 @@ export default function DashboardPage() {
                         {user?.slug 
                           ? (mounted && typeof window !== 'undefined' 
                               ? `${window.location.origin}/u/${user.slug}` 
-                              : `PiggyBack.app/u/${user.slug}`)
+                              : `piggybank.xyz/u/${user.slug}`)
                           : 'Loading...'
                         }
                       </div>

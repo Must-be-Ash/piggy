@@ -141,10 +141,10 @@ export function Header({ className = "" }: HeaderProps) {
           <div className="text-left">
             <h1 className={`text-xl font-bold tracking-tight transition-colors duration-300 ${
               pathname === '/' && isScrolledToWhite ? 'text-gray-900' : 'text-white'
-            }`}>PiggyBack</h1>
+            }`}>PiggyBank</h1>
             <p className={`text-xs font-medium hidden sm:block transition-colors duration-300 ${
               pathname === '/' && isScrolledToWhite ? 'text-gray-600' : 'text-gray-300'
-            }`}>Crypto Donations</p>
+            }`}>Get Tips In Any Tokens</p>
           </div>
         </Link>
 
@@ -299,7 +299,7 @@ export function Header({ className = "" }: HeaderProps) {
                       <div className="bg-gradient-to-r from-[#f8fafc] to-[#f1f5f9] border border-[#e2e8f0] p-3 rounded-lg">
                         <p className="text-xs text-[#718096] font-medium mb-1">Your Page</p>
                         <p className="text-xs font-mono text-[#2d3748] truncate">
-                          PiggyBack.app/u/{user.slug}
+                        piggybank.xyz/u/{user.slug}
                         </p>
                       </div>
                     )}
@@ -406,7 +406,7 @@ export function Header({ className = "" }: HeaderProps) {
               <div className="flex-1 min-w-0">
                 <p className="text-xs text-gray-300 font-medium mb-1">Your Link</p>
                 <code className="text-xs bg-black/40 px-2 py-1 rounded font-mono text-gray-200 border border-white/20 block truncate">
-                  PiggyBack.app/u/{user.slug}
+                  PiggyBank.xyz/u/{user.slug}
                 </code>
               </div>
               <button

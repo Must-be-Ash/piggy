@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "build": "next build",
+    "build:production": "rm -rf .next && NODE_ENV=production next build",
+    "build:vercel": "rm -rf .next && NODE_ENV=production SKIP_ENV_VALIDATION=true next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "test:build": "npm run build:production && npm run start"
   },
   "dependencies": {
     "@dynamic-labs/assert-package-version": "latest",

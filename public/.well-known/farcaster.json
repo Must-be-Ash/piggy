@@ -1,0 +1,39 @@
+{
+      "accountAssociation": 
+      {
+        "header": "eyJmaWQiOjI0MjQzNCwidHlwZSI6ImN1c3RvZHkiLCJrZXkiOiIweDhmMUJBYjZBNkM4MjAxZTc0OTFlQzM2QzcxMUQ4MThmMEQ1OGYzNkIifQ",
+        "payload": "eyJkb21haW4iOiJwaWdneWJhbmtzLnh5eiJ9",
+        "signature": "MHhjYWZkOTlkNzQyNTBkNjhkYTM5MTFiNDBlNWM1NDc1YzQxY2RkMmUzZGI0NDIzMzA2MTQ1MTg2N2MwMzAxZjc1MTdhYzliZTM5NTNlODM3NzEyYTlmZjIxOTcyZWQ1NjU1MjM5MjVlZjM5MDg4YmQ4NzQ4NjhjY2VjYTdjNTVhMDFj"
+      }
+      ,
+      "frame": {
+        "version": "1",
+        "name": "PiggyBanks",
+        "subtitle": "Get Tips In Any Tokens",
+        "description": "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+        "iconUrl": "https://piggybanks.xyz/favicon-32x32.png",
+        "homeUrl": "https://piggybanks.xyz",
+        "splashImageUrl": "https://piggybanks.xyz/logo/logo.png",
+        "splashBackgroundColor": "#333333",
+        "heroImageUrl": "https://piggybanks.xyz/og.png",
+        "tagline": "Crypto donations made simple",
+        "screenshotUrls": [
+          "https://piggybanks.xyz/tip.png",
+          "https://piggybanks.xyz/mobile.png",
+          "https://piggybanks.xyz/tipper.png"
+        ],
+        "primaryCategory": "finance",
+        "tags": [
+          "crypto",
+          "donations",
+          "tips",
+          "web3",
+          "payments"
+        ],
+        "webhookUrl": "https://piggybanks.xyz/api/webhook",
+        "ogTitle": "PiggyBanks - Get Tips In Any Tokens",
+        "ogDescription": "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+        "ogImageUrl": "https://piggybanks.xyz/og.png"
+      }
+    }
+  

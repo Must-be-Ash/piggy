@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Copy, Check, Share } from "lucide-react"
 import { SiFarcaster } from "react-icons/si"
 import { useToast } from "@/hooks/use-toast"
+import { useMiniKit } from "@coinbase/onchainkit/minikit"
 
 interface CopyLinkButtonProps {
   url?: string
@@ -112,6 +113,7 @@ export function ShareButton({
   size = "default"
 }: ShareButtonProps) {
   const shareUrl = url || (typeof window !== 'undefined' ? window.location.href : '')
+  const { context } = useMiniKit()
   
   const getShareUrl = () => {
     const encodedUrl = encodeURIComponent(shareUrl)
@@ -121,6 +123,10 @@ export function ShareButton({
       case "twitter":
         return `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`
       case "farcaster":
+        // For mini apps, we'll use the composeCast action, fallback to direct URL for web
+        if (context) {
+          return null // Will use composeCast action instead
+        }
         return `https://warpcast.com/~/compose?text=${encodedText}%20${encodedUrl}`
       default:
         return shareUrl
@@ -139,7 +145,16 @@ export function ShareButton({
   }
 
   const handleShare = () => {
-    window.open(getShareUrl(), '_blank', 'width=600,height=400')
+    if (platform === "farcaster" && context) {
+      // In mini app context, use SDK action instead of window.open
+      // For now, we'll disable farcaster sharing in mini apps until composeCast is properly implemented
+      return
+    }
+    
+    const shareUrl = getShareUrl()
+    if (shareUrl) {
+      window.open(shareUrl, '_blank', 'width=600,height=400')
+    }
   }
 
   return (

@@ -2,6 +2,7 @@ import type React from "react"
 import "./globals.css"
 import { Inter, Cormorant_Garamond } from "next/font/google"
 import { Web3Provider } from "@/components/web3-provider"
+import { MiniKitContextProvider } from "@/components/minikit-provider"
 import { Footer } from "@/components/footer"
 import { Toaster } from "@/components/ui/toaster"
 import { Analytics } from "@vercel/analytics/react"
@@ -15,7 +16,7 @@ const cormorantGaramond = Cormorant_Garamond({
 })
 
 export const viewport: Viewport = {
-  themeColor: "#2d3748",
+  themeColor: "#333333",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -25,7 +26,17 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "PiggyBanks - Get Tips In Any Tokens",
   description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
-  keywords: "tips, crypto donations, cryptocurrency tips, crypto tipping, donation page, web3 donations, accept crypto, bitcoin donations, ethereum donations",
+  keywords: [
+    "tips", 
+    "crypto donations", 
+    "cryptocurrency tips", 
+    "crypto tipping", 
+    "donation page", 
+    "web3 donations", 
+    "accept crypto", 
+    "bitcoin donations", 
+    "ethereum donations"
+  ],
   authors: [{ name: "PiggyBanks" }],
   icons: {
     icon: [
@@ -40,7 +51,7 @@ export const metadata: Metadata = {
       { 
         rel: 'mask-icon', 
         url: '/safari-pinned-tab.svg',
-        color: '#2d3748'
+        color: '#333333'
       },
     ],
   },
@@ -48,7 +59,8 @@ export const metadata: Metadata = {
   openGraph: {
     title: "PiggyBanks - Get Tips In Any Tokens",
     description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
-    url: "https://piggybanks.xyz/",
+    url: "https://piggybanks.xyz",
+    siteName: "PiggyBanks",
     type: "website",
     images: [
       {
@@ -58,7 +70,7 @@ export const metadata: Metadata = {
         alt: "PiggyBanks - Get Tips In Any Tokens"
       },
     ],
-    siteName: "PiggyBanks",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
@@ -67,17 +79,7 @@ export const metadata: Metadata = {
     images: ["https://piggybanks.xyz/og.png"],
     creator: "@must_be_must",
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
+  metadataBase: new URL("https://piggybanks.xyz"),
 }
 
 export default function RootLayout({
@@ -87,17 +89,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning className="bg-[#333333]">
+      <head>
+        <meta
+          name="fc:miniapp"
+          content='{"version":"1","imageUrl":"https://piggybanks.xyz/og.png","button":{"title":"Launch PiggyBanks","action":{"type":"launch_frame","url":"https://piggybanks.xyz","name":"PiggyBanks"}}}'
+        />
+      </head>
       <body className={`${inter.className} ${cormorantGaramond.variable} bg-[#333333]`} suppressHydrationWarning>
-        <Web3Provider>
-          <div className="min-h-screen flex flex-col bg-[#333333]">
-            <div className="flex-1">
-              {children}
+        <MiniKitContextProvider>
+          <Web3Provider>
+            <div className="min-h-screen flex flex-col bg-[#333333]">
+              <div className="flex-1">
+                {children}
+              </div>
+              <Footer />
             </div>
-            <Footer />
-          </div>
-          <Toaster />
-          <Analytics />
-        </Web3Provider>
+            <Toaster />
+            <Analytics />
+          </Web3Provider>
+        </MiniKitContextProvider>
       </body>
     </html>
   )

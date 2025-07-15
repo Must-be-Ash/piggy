@@ -12,6 +12,7 @@
     "test:build": "npm run build:production && npm run start"
   },
   "dependencies": {
+    "@coinbase/onchainkit": "^0.38.17",
     "@dynamic-labs/assert-package-version": "latest",
     "@dynamic-labs/ethereum": "latest",
     "@dynamic-labs/ethereum-core": "latest",

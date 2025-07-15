@@ -32,7 +32,7 @@
         ],
         "webhookUrl": "https://piggybanks.xyz/api/webhook",
         "ogTitle": "Get Tips In Any Tokens",
-        "ogDescription": "Create your personalized crypto donation page & accept tips in any cryptocurrency. Simple and secure.",
+        "ogDescription": "Create a personalized crypto donation page and accept tips in any token. Simple, easy, and secure.",
         "ogImageUrl": "https://piggybanks.xyz/og.png"
       }
     }

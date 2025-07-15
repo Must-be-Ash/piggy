@@ -31,9 +31,8 @@
           "payments"
         ],
         "webhookUrl": "https://piggybanks.xyz/api/webhook",
-        "ogTitle": "PiggyBanks - Get Tips In Any Tokens",
-        "ogDescription": "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+        "ogTitle": "Get Tips In Any Tokens",
+        "ogDescription": "Create your personalized crypto donation page & accept tips in any cryptocurrency. Simple and secure.",
         "ogImageUrl": "https://piggybanks.xyz/og.png"
       }
     }
-  

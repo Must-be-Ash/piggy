@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { Camera, Upload, X, User } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import type { PutBlobResult } from '@vercel/blob'
@@ -149,31 +148,31 @@ export function AvatarUpload({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={triggerFileSelect}
-          disabled={disabled || uploading}
-          className="flex items-center gap-2"
-        >
-          <Upload className="h-4 w-4" />
-          {uploading ? "Uploading..." : previewUrl ? "Change" : "Upload"}
-        </Button>
+      <div className="flex flex-row gap-2">
+        <div className="modern-auth-button-small">
+          <button
+            type="button"
+            onClick={triggerFileSelect}
+            disabled={disabled || uploading}
+            className="flex items-center gap-2"
+          >
+            <Upload className="h-4 w-4" />
+            {uploading ? "Uploading..." : previewUrl ? "Change" : "Upload"}
+          </button>
+        </div>
         
         {previewUrl && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleRemoveAvatar}
-            disabled={disabled || uploading}
-            className="flex items-center gap-2 text-red-600 hover:text-red-700"
-          >
-            <X className="h-4 w-4" />
-            Remove
-          </Button>
+          <div className="modern-auth-button-small">
+            <button
+              type="button"
+              onClick={handleRemoveAvatar}
+              disabled={disabled || uploading}
+              className="flex items-center gap-2 text-red-600 hover:text-red-700"
+            >
+              <X className="h-4 w-4" />
+              Remove
+            </button>
+          </div>
         )}
       </div>
 

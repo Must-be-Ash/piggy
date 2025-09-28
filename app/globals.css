@@ -198,3 +198,227 @@ body {
     }
   }
 }
+
+/* Modern Auth Button Styles - Exact copy from freepik project */
+.modern-auth-button {
+  position: relative;
+  display: inline-block;
+}
+
+.modern-auth-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(145deg, #4a4a4a 0%, #3a3a3a 50%, #2a2a2a 100%);
+  border-radius: 50px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+  z-index: 1;
+}
+
+.modern-auth-button::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  right: 4px;
+  bottom: 5px;
+  background: linear-gradient(145deg, #6a6a6a 0%, #5a5a5a 50%, #4a4a4a 100%);
+  border-radius: 46px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 6px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+  z-index: 2;
+  transform: translateY(-1px);
+}
+
+.modern-auth-button:hover::after {
+  background: linear-gradient(145deg, #7a7a7a 0%, #6a6a6a 50%, #5a5a5a 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 3px rgba(0,0,0,0.2);
+  transform: translateY(1px);
+}
+
+.modern-auth-button:active::after {
+  background: linear-gradient(145deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+  transform: translateY(2px);
+}
+
+.modern-auth-button > *,
+.modern-auth-button button,
+.modern-auth-button a {
+  all: unset !important;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 16px 32px !important;
+  border-radius: 50px !important;
+  font-weight: 500 !important;
+  color: white !important;
+  background: transparent !important;
+  border: none !important;
+  min-width: 180px !important;
+  font-size: 16px !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Text movement to match button animation */
+.modern-auth-button:hover > *,
+.modern-auth-button:hover button,
+.modern-auth-button:hover a {
+  transform: translateY(1px) !important;
+}
+
+.modern-auth-button:active > *,
+.modern-auth-button:active button,
+.modern-auth-button:active a {
+  transform: translateY(2px) !important;
+}
+
+/* Remove any remaining default button styling */
+.modern-auth-button button:hover,
+.modern-auth-button a:hover,
+.modern-auth-button *:hover,
+.modern-auth-button button:active,
+.modern-auth-button a:active, 
+.modern-auth-button *:active {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Small version of modern auth button */
+.modern-auth-button-small {
+  position: relative;
+  display: inline-block;
+}
+
+.modern-auth-button-small::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(145deg, #4a4a4a 0%, #3a3a3a 50%, #2a2a2a 100%);
+  border-radius: 20px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
+  z-index: 1;
+}
+
+.modern-auth-button-small::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 3px;
+  background: linear-gradient(145deg, #6a6a6a 0%, #5a5a5a 50%, #4a4a4a 100%);
+  border-radius: 18px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 1px 3px rgba(0,0,0,0.3);
+  transition: all 0.2s ease;
+  z-index: 2;
+  transform: translateY(-1px);
+}
+
+.modern-auth-button-small:hover::after {
+  background: linear-gradient(145deg, #7a7a7a 0%, #6a6a6a 50%, #5a5a5a 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.2);
+  transform: translateY(0.25px);
+}
+
+.modern-auth-button-small:active::after {
+  background: linear-gradient(145deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+  transform: translateY(2px);
+}
+
+.modern-auth-button-small > *,
+.modern-auth-button-small button,
+.modern-auth-button-small a {
+  all: unset !important;
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  padding: 12px !important;
+  border-radius: 20px !important;
+  font-weight: 500 !important;
+  color: white !important;
+  background: transparent !important;
+  border: none !important;
+  min-width: auto !important;
+  font-size: 12px !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Text movement to match button animation */
+.modern-auth-button-small:hover > *,
+.modern-auth-button-small:hover button,
+.modern-auth-button-small:hover a {
+  transform: translateY(0.25px) !important;
+}
+
+.modern-auth-button-small:active > *,
+.modern-auth-button-small:active button,
+.modern-auth-button-small:active a {
+  transform: translateY(2px) !important;
+}
+
+/* Remove any remaining default button styling */
+.modern-auth-button-small button:hover,
+.modern-auth-button-small a:hover,
+.modern-auth-button-small *:hover,
+.modern-auth-button-small button:active,
+.modern-auth-button-small a:active, 
+.modern-auth-button-small *:active {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Fund component Deposit button styling - more specific selectors */
+[data-vaul-drawer] button,
+[data-vaul-drawer] input[type="button"],
+[data-vaul-drawer] input[type="submit"],
+[data-vaul-drawer] .cdp-button,
+[data-vaul-drawer] [role="button"] {
+  background: #0000FF !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 12px 24px !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 4px rgba(236, 154, 166, 0.3) !important;
+}
+
+[data-vaul-drawer] button:hover,
+[data-vaul-drawer] input[type="button"]:hover,
+[data-vaul-drawer] input[type="submit"]:hover,
+[data-vaul-drawer] .cdp-button:hover,
+[data-vaul-drawer] [role="button"]:hover {
+  background: #0000FF !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 8px rgba(236, 154, 166, 0.4) !important;
+}
+
+/* Hide Coinbase button in drawer */
+[data-vaul-drawer] button[data-testid="coinbase-button"],
+[data-vaul-drawer] button:has-text("Coinbase"),
+[data-vaul-drawer] button:has-text("Continue with Coinbase"),
+[data-vaul-drawer] .coinbase-button,
+[data-vaul-drawer] [class*="coinbase"],
+[data-vaul-drawer] button[aria-label*="Coinbase"] {
+  display: none !important;
+}

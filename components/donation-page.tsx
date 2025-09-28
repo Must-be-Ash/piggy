@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { ExternalLink, Users, Shield, Zap, User } from "lucide-react"
-import { Snout } from "@/components/ui/snout"
+import { Shield, User } from "lucide-react"
+import { FaXTwitter } from "react-icons/fa6"
+// import { Snout } from "@/components/ui/snout"
 import { SiFarcaster } from "react-icons/si"
 import { useAccount } from "wagmi"
 import { Header } from "@/components/header"
@@ -34,6 +34,7 @@ function DonationPageContent({ user }: DonationPageProps) {
   const [isOwnPage, setIsOwnPage] = useState(false)
   const [pageUrl, setPageUrl] = useState('')
   const [mounted, setMounted] = useState(false)
+  const [isAddressCopied, setIsAddressCopied] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -47,6 +48,18 @@ function DonationPageContent({ user }: DonationPageProps) {
       setIsOwnPage(false)
     }
   }, [mounted, address, user.address])
+
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(user.address)
+      setIsAddressCopied(true)
+      setTimeout(() => {
+        setIsAddressCopied(false)
+      }, 2000)
+    } catch (error) {
+      console.error('Failed to copy address:', error)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#2d3748] via-[#4a5568] to-[#1a202c]">
@@ -94,17 +107,12 @@ function DonationPageContent({ user }: DonationPageProps) {
                 <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
                   <Shield className="h-4 w-4 text-green-400" />
                   <span className="text-sm font-medium">Verified Wallet</span>
-                  <code className="text-xs bg-black/30 px-2 py-1 rounded font-mono">
-                    {user.address.slice(0, 6)}...{user.address.slice(-4)}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 hover:bg-white/20"
-                    onClick={() => window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
+                  <button
+                    onClick={copyAddress}
+                    className="text-xs bg-black/30 px-2 py-1 rounded font-mono hover:bg-black/50 transition-colors cursor-pointer"
                   >
-                    <ExternalLink className="h-3 w-3" />
-                  </Button>
+                    {isAddressCopied ? "Copied!" : `${user.address.slice(0, 6)}...${user.address.slice(-4)}`}
+                  </button>
                 </div>
               </div>
 
@@ -112,28 +120,26 @@ function DonationPageContent({ user }: DonationPageProps) {
               {!mounted || !isOwnPage ? (
                 /* Show social links for visitors */
                 (user.twitter || user.farcaster) && (
-                  <div className="flex items-center justify-center gap-3 py-2">
+                  <div className="flex items-center justify-center gap-3 py-1">
                     {user.twitter && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-3 bg-white/10 hover:bg-[#EC9AA6] text-white border border-white/20 hover:border-white/30 transition-all duration-200"
-                        onClick={() => window.open(user.twitter, "_blank")}
-                      >
-                        <span className="mr-2">𝕏</span>
-                        <span className="text-sm">Twitter</span>
-                      </Button>
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.twitter, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <FaXTwitter className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
                     )}
                     {user.farcaster && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-3 bg-white/10 hover:bg-[#EC9AA6] text-white border border-white/20 hover:border-white/30 transition-all duration-200"
-                        onClick={() => window.open(user.farcaster, "_blank")}
-                      >
-                        <SiFarcaster className="h-4 w-4 mr-2 text-current" />
-                        <span className="text-sm">Farcaster</span>
-                      </Button>
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.farcaster, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <SiFarcaster className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 )
@@ -273,17 +279,25 @@ export function DonationPage({ user }: DonationPageProps) {
                   <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/20">
                     <Shield className="h-4 w-4 text-green-400" />
                     <span className="text-sm font-medium">Verified Wallet</span>
-                    <code className="text-xs bg-black/30 px-2 py-1 rounded font-mono">
-                      {user.address.slice(0, 6)}...{user.address.slice(-4)}
-                    </code>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 hover:bg-white/20"
-                      onClick={() => window.open(`https://etherscan.io/address/${user.address}`, "_blank")}
+                    <button
+                      onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(user.address)
+                          // Show brief feedback
+                          const button = event?.target as HTMLElement
+                          const originalText = button.textContent
+                          button.textContent = "Copied!"
+                          setTimeout(() => {
+                            button.textContent = originalText
+                          }, 2000)
+                        } catch (error) {
+                          console.error('Failed to copy address:', error)
+                        }
+                      }}
+                      className="text-xs bg-black/30 px-2 py-1 rounded font-mono hover:bg-black/50 transition-colors cursor-pointer"
                     >
-                      <ExternalLink className="h-3 w-3" />
-                    </Button>
+                      {user.address.slice(0, 6)}...{user.address.slice(-4)}
+                    </button>
                   </div>
                 </div>
 
@@ -291,26 +305,24 @@ export function DonationPage({ user }: DonationPageProps) {
                 {(user.twitter || user.farcaster) && (
                   <div className="flex items-center justify-center gap-3 py-2">
                     {user.twitter && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-3 bg-white/10 hover:bg-[white/20] text-white border border-white/20 hover:border-white/30 transition-all duration-200"
-                        onClick={() => window.open(user.twitter, "_blank")}
-                      >
-                        <span className="mr-2">𝕏</span>
-                        <span className="text-sm">Twitter</span>
-                      </Button>
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.twitter, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <FaXTwitter className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
                     )}
                     {user.farcaster && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 px-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/30 transition-all duration-200"
-                        onClick={() => window.open(user.farcaster, "_blank")}
-                      >
-                        <SiFarcaster className="h-4 w-4 mr-2 text-current" />
-                        <span className="text-sm">Farcaster</span>
-                      </Button>
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.farcaster, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <SiFarcaster className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}

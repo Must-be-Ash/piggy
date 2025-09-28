@@ -4,16 +4,15 @@ import type React from "react"
 
 import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
-import { useAccount } from "wagmi"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useIsSignedIn, useEvmAddress, useCurrentUser } from "@coinbase/cdp-hooks"
+
+import { Card, CardContent} from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { LinkIcon, Zap, Shield } from "lucide-react"
-import { Snout } from "@/components/ui/snout"
+import { LinkIcon } from "lucide-react"
+//import { Snout } from "@/components/ui/snout"
 import { useToast } from "@/hooks/use-toast"
-import { AuthModal } from "@/components/auth-modal"
 import { Header } from "@/components/header"
 import { LoadingState } from "@/components/loading-state"
 import { AvatarUpload } from "@/components/avatar-upload"
@@ -37,7 +36,13 @@ export default function OnboardingPage() {
     checking: boolean
     message: string
   }>({ available: null, checking: false, message: "" })
-  const { address, isConnected } = useAccount()
+  const { isSignedIn } = useIsSignedIn()
+  const { evmAddress } = useEvmAddress()
+  const { currentUser } = useCurrentUser()
+
+  // Use Smart Account address for user operations
+  const address = currentUser?.evmSmartAccounts?.[0] || evmAddress
+  const isConnected = isSignedIn
   const router = useRouter()
   const { toast } = useToast()
   const { updateUser } = useAuthenticatedApi()
@@ -134,6 +139,13 @@ export default function OnboardingPage() {
     return () => clearTimeout(timeoutId)
   }, [displayName, checkSlugAvailability])
 
+  // Redirect to auth page if not connected
+  useEffect(() => {
+    if (!isConnected && connectionChecked) {
+      router.push("/auth")
+    }
+  }, [isConnected, connectionChecked, router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!address) return
@@ -212,11 +224,12 @@ export default function OnboardingPage() {
       } else {
         throw new Error(data.error || "Failed to save profile")
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error saving profile:", error)
+      const errorMessage = error instanceof Error ? error.message : "Failed to save your profile. Please try again."
       toast({
         title: "Error",
-        description: error.message || "Failed to save your profile. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       })
     } finally {
@@ -240,12 +253,10 @@ export default function OnboardingPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#2d3748] via-[#4a5568] to-[#1a202c]">
         <Header />
-        <div className="flex items-center justify-center min-h-[calc(100vh-80px)] p-4 -mt-16">
-          <AuthModal 
-            title="Connect to Get Started"
-            description="Connect your wallet to create your crypto donation page"
-          />
-        </div>
+        <LoadingState 
+          title="Redirecting to Authentication"
+          description="Please wait while we redirect you to sign in..."
+        />
       </div>
     )
   }
@@ -258,23 +269,9 @@ export default function OnboardingPage() {
       <div className="relative text-white overflow-hidden min-h-[calc(100vh-80px)]">
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
         
-        <div className="relative max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex items-center justify-center min-h-[calc(100vh-80px)]">
+        {/* Form Section - Constrained Width */}
+        <div className="relative max-w-2xl mx-auto px-4 sm:px-6 py-8 sm:py-12 pt-24">
           <div className="w-full">
-            <div className="text-center mb-8">
-              <div className="w-20 h-20 bg-gradient-to-br from-white to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl">
-                <Snout className="h-10 w-10 text-[#2d3748]" />
-              </div>
-              <h1 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">
-                {isEditing ? "Edit Your Profile" : "Complete Your Profile"}
-              </h1>
-              <p className="text-xl text-gray-300 leading-relaxed">
-                {isEditing 
-                  ? "Update your crypto donation page information" 
-                  : "Set up your crypto donation page in just a few steps"
-                }
-              </p>
-            </div>
-
             {/* Form Section */}
             <div className="max-w-xl mx-auto">
               <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm">
@@ -304,9 +301,7 @@ export default function OnboardingPage() {
                         className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
                       />
                       <div className="space-y-2">
-                        <p className="text-sm text-[#718096]">
-                          This will be shown on your donation page
-                        </p>
+                       
                         {slugStatus.message && (
                           <div className={`flex items-center gap-2 p-3 rounded-lg ${
                             slugStatus.checking 
@@ -341,23 +336,17 @@ export default function OnboardingPage() {
                         maxLength={500}
                         className="text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl resize-none"
                       />
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-[#718096]">
-                          Share your story and goals
-                        </p>
-                        <span className="text-sm text-[#718096] font-mono">
-                          {bio.length}/500
-                        </span>
-                      </div>
+                        <div className="flex justify-end items-center">
+                          <span className="text-sm text-[#718096] font-mono">
+                            {bio.length}/500
+                          </span>
+                        </div>
                     </div>
 
                     {/* Social Profiles Section */}
                     <div className="space-y-4">
                       <div className="border-t border-[#e2e8f0] pt-6">
-                        <h3 className="text-lg font-semibold text-[#1a202c] mb-4">Social Profiles (Optional)</h3>
-                        <p className="text-sm text-[#718096] mb-4">
-                          Add your social profiles to help supporters connect with you. Enter full profile URLs.
-                        </p>
+                       
                         
                         <div className="space-y-4">
                           <div className="space-y-3">
@@ -366,15 +355,13 @@ export default function OnboardingPage() {
                             </Label>
                             <Input
                               id="twitter"
-                              placeholder="https://twitter.com/yourusername or https://x.com/yourusername"
+                              placeholder="https://x.com/yourusername"
                               value={twitter}
                               onChange={(e) => setTwitter(e.target.value)}
                               type="url"
                               className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
                             />
-                            <p className="text-xs text-[#718096]">
-                              Example: https://twitter.com/yourusername or https://x.com/yourusername
-                            </p>
+                            
                           </div>
 
                           <div className="space-y-3">
@@ -389,9 +376,7 @@ export default function OnboardingPage() {
                               type="url"
                               className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
                             />
-                            <p className="text-xs text-[#718096]">
-                              Example: https://warpcast.com/yourusername
-                            </p>
+                            
                           </div>
                         </div>
                       </div>
@@ -411,25 +396,28 @@ export default function OnboardingPage() {
                       </div>
                     </div>
 
-                    <Button 
-                      type="submit" 
-                      className="w-full h-12 text-base font-semibold bg-gradient-to-r from-[#2d3748] to-[#4a5568] hover:from-[#EC9AA6] hover:to-[#EC9AA6] text-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300" 
-                      disabled={
-                        isLoading || 
-                        !displayName.trim() || 
-                        slugStatus.checking || 
-                        (slugStatus.available === false)
-                      }
-                    >
-                      {isLoading ? (
-                        <div className="flex items-center gap-3">
-                          <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
-                          Saving...
-                        </div>
-                      ) : (
-                        isEditing ? "Update Profile" : "Create My Page"
-                      )}
-                    </Button>
+                    <div className="flex justify-center w-full">
+                      <div className="modern-auth-button">
+                      <button
+                        type="submit"
+                        disabled={
+                          isLoading || 
+                          !displayName.trim() || 
+                          slugStatus.checking || 
+                          (slugStatus.available === false)
+                        }
+                      >
+                        {isLoading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                            Saving...
+                          </>
+                        ) : (
+                          isEditing ? "Update Profile" : "Create My Page"
+                        )}
+                      </button>
+                      </div>
+                    </div>
                   </form>
                 </CardContent>
               </Card>

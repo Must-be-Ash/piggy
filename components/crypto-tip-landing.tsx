@@ -4,18 +4,26 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useAccount } from "wagmi"
+import { useIsSignedIn, useEvmAddress, useCurrentUser } from "@coinbase/cdp-hooks"
 import { useState, useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
+
 import { ButtonShimmer } from "@/components/ui/button-shimmer"
 import { GlassmorphicButton } from "@/components/ui/glassmorphic-button"
 
 export default function CryptoTipLanding() {
   const router = useRouter()
   const { isConnected } = useAccount()
+  const { isSignedIn } = useIsSignedIn()
+  const { evmAddress } = useEvmAddress()
+  const { currentUser } = useCurrentUser()
   const [mounted, setMounted] = useState(false)
   const forwardVideoRef = useRef<HTMLVideoElement>(null)
   const backwardVideoRef = useRef<HTMLVideoElement>(null)
   const [isPlayingBackward, setIsPlayingBackward] = useState(false)
+
+  // Use Smart Account address for user operations
+  const address = currentUser?.evmSmartAccounts?.[0] || evmAddress
+  const effectiveConnected = isSignedIn || isConnected
 
   useEffect(() => {
     setMounted(true)
@@ -69,10 +77,12 @@ export default function CryptoTipLanding() {
   const handleGetStarted = () => {
     if (!mounted) return
     
-    if (isConnected) {
+    if (effectiveConnected && address) {
+      // User is connected, go to dashboard (it will handle profile check)
       router.push("/dashboard")
     } else {
-      router.push("/onboarding")
+      // User not connected, go to auth page
+      router.push("/auth")
     }
   }
   return (

@@ -1,6 +1,6 @@
 "use client"
 
-import Link from "next/link"
+// import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAccount } from "wagmi"
 import { useState, useEffect } from "react"

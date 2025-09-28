@@ -73,8 +73,8 @@ export async function PUT(
     
     // Fields that can be updated
     const allowedUpdates = ['displayName', 'bio', 'avatar', 'twitter', 'github', 'website', 'preferredCurrency', 'minDonationAmount']
-    const updates: any = {}
-    
+    const updates: Record<string, unknown> = {}
+
     // Filter and validate updates
     for (const [key, value] of Object.entries(body)) {
       if (allowedUpdates.includes(key)) {
@@ -87,14 +87,14 @@ export async function PUT(
     }
     
     // Validate field lengths
-    if (updates.displayName && updates.displayName.length > 50) {
+    if (updates.displayName && typeof updates.displayName === 'string' && updates.displayName.length > 50) {
       return NextResponse.json(
         { error: 'Display name must be 50 characters or less' },
         { status: 400 }
       )
     }
-    
-    if (updates.bio && updates.bio.length > 500) {
+
+    if (updates.bio && typeof updates.bio === 'string' && updates.bio.length > 500) {
       return NextResponse.json(
         { error: 'Bio must be 500 characters or less' },
         { status: 400 }

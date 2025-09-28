@@ -1,9 +1,9 @@
 "use client"
 
-import { signMessage } from '@wagmi/core'
+import { signMessage, type Config } from '@wagmi/core'
 import { createAuthMessage } from './auth-middleware'
 
-export async function createAuthenticatedHeaders(config: any): Promise<Record<string, string>> {
+export async function createAuthenticatedHeaders(config: Config): Promise<Record<string, string>> {
   try {
     const { message, timestamp } = createAuthMessage()
     
@@ -25,9 +25,9 @@ export async function createAuthenticatedHeaders(config: any): Promise<Record<st
 }
 
 export async function authenticatedFetch(
-  url: string, 
+  url: string,
   options: RequestInit,
-  wagmiConfig: any
+  wagmiConfig: Config
 ): Promise<Response> {
   const authHeaders = await createAuthenticatedHeaders(wagmiConfig)
   

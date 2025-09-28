@@ -80,12 +80,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     )
     
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error creating user:', error)
-    
-    // Handle duplicate key errors
-    if (error.code === 11000) {
-      const field = Object.keys(error.keyPattern)[0]
+
+    // Handle duplicate key errors (MongoDB error)
+    if (error && typeof error === 'object' && 'code' in error && error.code === 11000 && 'keyPattern' in error) {
+      const field = Object.keys(error.keyPattern as Record<string, unknown>)[0]
       return NextResponse.json(
         { error: `This ${field} is already taken` },
         { status: 409 }

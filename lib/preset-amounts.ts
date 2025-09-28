@@ -40,7 +40,7 @@ export function getSmartPresets(
   
   // Meme coins and unknown price tokens - use token amounts based on balance
   if (tokenPrice === 0 || tokenPrice < 0.1) {
-    return getMemeTokenPresets(balance, symbol);
+    return getMemeTokenPresets(balance);
   }
   
   // Default fallback
@@ -54,7 +54,7 @@ export function getSmartPresets(
 /**
  * Generate presets for meme coins based on available balance
  */
-function getMemeTokenPresets(balance: number, symbol: string): PresetConfig {
+function getMemeTokenPresets(balance: number): PresetConfig {
   // For very large balances (millions+)
   if (balance >= 1000000) {
     return {
@@ -122,7 +122,7 @@ function isStablecoin(symbol: string): boolean {
 /**
  * Format preset amount for display
  */
-export function formatPresetAmount(amount: number, decimals: number = 18): string {
+export function formatPresetAmount(amount: number): string {
   if (amount >= 1000000) {
     return `${(amount / 1000000).toFixed(1)}M`;
   }

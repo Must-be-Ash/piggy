@@ -106,7 +106,6 @@ interface ShareButtonProps {
 
 export function ShareButton({
   url,
-  title: _title = "Support me with crypto donations",
   text = "Check out my donation page",
   platform,
   className = "",

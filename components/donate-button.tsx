@@ -87,8 +87,11 @@ export function DonateButton({
 
       {isModalOpen && (
         <EnhancedDonationModal
-          recipient={recipient}
+          isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          recipientAddress={recipient.address}
+          recipientName={recipient.displayName}
+          recipientAvatar={recipient.avatar}
         />
       )}
     </>

@@ -14,6 +14,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     const timestamp = Date.now();
     const uniqueFilename = `avatars/${timestamp}-${filename}`;
 
+    if (!request.body) {
+      return NextResponse.json({ error: 'Request body is required' }, { status: 400 });
+    }
+
     const blob = await put(uniqueFilename, request.body, {
       access: 'public',
     });

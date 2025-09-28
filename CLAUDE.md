@@ -89,9 +89,11 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ```
 
 ### Development Notes
-- Uses pnpm for package management (has pnpm-lock.yaml)
-- TypeScript configured with strict mode
-- Tailwind CSS for styling with custom theme
-- All API routes use proper error handling and validation
-- Database uses indexes for optimal query performance
-- Wallet connection via Dynamic Labs with Wagmi integration
+- **Package Manager**: Uses npm (despite presence of pnpm-lock.yaml)
+- **TypeScript**: Configured with strict mode; path alias `@/*` maps to root directory
+- **Build Configuration**: ESLint and TypeScript errors are ignored during builds (`ignoreDuringBuilds: true`) - use `npm run lint` to check code quality manually
+- **Images**: Unoptimized for faster builds and deployment
+- **Styling**: Tailwind CSS with custom theme, shadcn/ui components
+- **API Routes**: All use proper error handling and validation
+- **Database**: Indexes configured for optimal query performance
+- **Wallet Integration**: Dynamic Labs with Wagmi v2 connector

@@ -181,20 +181,16 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-[#EC9AA6] to-[#d1707e] border-0 shadow-lg hover:shadow-xl transition-all duration-200">
+              <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg hover:shadow-xl transition-all duration-200">
                 <CardContent className="p-4 text-center">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-3 ${
-                    isCopied
-                      ? 'bg-white/20'
-                      : 'bg-white/10'
-                  }`}>
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#2d3748] to-[#4a5568] rounded-xl flex items-center justify-center mx-auto mb-3">
                     {isCopied ? (
                       <Check className="h-6 w-6 text-white" />
                     ) : (
                       <Copy className="h-6 w-6 text-white" />
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-3">
+                  <h3 className="text-lg font-semibold text-[#1a202c] mb-3">
                     {isCopied ? 'Link Copied!' : 'Share Your Page'}
                   </h3>
                   <div className="modern-auth-button w-full">

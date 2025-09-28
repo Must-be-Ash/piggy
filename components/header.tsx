@@ -153,7 +153,7 @@ export function Header({ className = "" }: HeaderProps) {
             }`}>PiggyBanks</h1>
             <p className={`text-xs font-medium hidden sm:block transition-colors duration-300 ${
               pathname === '/' && isScrolledToWhite ? 'text-gray-600' : 'text-gray-300'
-            }`}>Get Tips In Any Tokens</p>
+            }`}>Get Tips In USDC</p>
           </div>
         </Link>
 

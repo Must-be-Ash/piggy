@@ -24,8 +24,8 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: "PiggyBanks - Get Tips In Any Tokens",
-  description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+  title: "PiggyBanks - Get Tips In USDC",
+  description: "Create your personalized crypto donation page and accept tips. Simple, easy, and secure.",
   keywords: [
     "tips", 
     "crypto donations", 
@@ -57,8 +57,8 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   openGraph: {
-    title: "PiggyBanks - Get Tips In Any Tokens",
-    description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+    title: "PiggyBanks - Get Tips In USDC",
+    description: "Create your personalized crypto donation page and accept tips. Simple, easy, and secure.",
     url: "https://piggybanks.xyz",
     siteName: "PiggyBanks",
     type: "website",
@@ -67,15 +67,15 @@ export const metadata: Metadata = {
         url: "https://piggybanks.xyz/og.png",
         width: 1200,
         height: 630,
-        alt: "PiggyBanks - Get Tips In Any Tokens"
+        alt: "PiggyBanks - Get Tips In USDC"
       },
     ],
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "PiggyBanks - Get Tips In Any Tokens",
-    description: "Create your personalized crypto donation page and accept tips in any EVM cryptocurrency. Simple, easy, and secure.",
+    title: "PiggyBanks - Get Tips In USDC",
+    description: "Create your personalized crypto donation page and accept tips. Simple, easy, and secure.",
     images: ["https://piggybanks.xyz/og.png"],
     creator: "@must_be_must",
   },

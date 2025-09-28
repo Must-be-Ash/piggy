@@ -138,8 +138,8 @@ export default function CryptoTipLanding() {
             className="max-w-4xl -mt-16 lg:mt-0"
           >
             <h1 className="text-6xl lg:text-8xl font-pp-editorial font-medium text-white leading-[0.9] mb-2 tracking-tight">
-              Get Tips In<br />
-              <span className="font-semibold mt-3 lg:mt-2 block">Any Tokens</span>
+              Get Tips<br />
+              <span className="font-semibold mt-3 lg:mt-2 block">In USDC</span>
             </h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
@@ -148,7 +148,7 @@ export default function CryptoTipLanding() {
               className="text-xl lg:text-2xl text-white/70 max-w-2xl leading-relaxed font-cormorant font-light mb-12"
             >
               receive tips and donations from people<br />
-              all around the world on any EVM chain
+              all around the world in stablecoins
             </motion.p>
             
             {/* CTA Button */}
@@ -200,8 +200,8 @@ export default function CryptoTipLanding() {
                   className="mx-auto rounded-2xl"
                 />
               </div>
-              <h3 className="text-2xl font-bold text-black mb-3">Multi-Chain Support</h3>
-              <p className="text-lg text-[#6b7280] font-medium">Accept tips on any EVM network including Ethereum, Base, Polygon, and more</p>
+              <h3 className="text-2xl font-bold text-black mb-3">No wallet needed</h3>
+              <p className="text-lg text-[#6b7280] font-medium">You can create a wallet and access your wallet using your email address</p>
             </div>
 
             {/* Feature 3 */}
@@ -215,8 +215,8 @@ export default function CryptoTipLanding() {
                   className="mx-auto rounded-2xl"
                 />
               </div>
-              <h3 className="text-2xl font-bold text-black mb-3">Any Token</h3>
-              <p className="text-lg text-[#6b7280] font-medium">Get tipped in any cryptocurrency token your supporters have in their wallet</p>
+              <h3 className="text-2xl font-bold text-black mb-3">Stablecoin</h3>
+              <p className="text-lg text-[#6b7280] font-medium">The tips you receive in USDC are equal in value to USD and don't fluctuate in value</p>
             </div>
           </div>
         </div>
@@ -233,7 +233,7 @@ export default function CryptoTipLanding() {
           >
             <h2 className="text-4xl lg:text-6xl font-bold text-black mb-8">Start receiving tips today</h2>
             <p className="text-xl text-[#6b7280] mb-12 max-w-2xl mx-auto">
-              Join thousands of creators already earning crypto tips from their community
+              start getting tips from your community and fans
             </p>
             <GlassmorphicButton
               variant="accent"

@@ -26,11 +26,13 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
-.env*
+.env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+# Allow .env.example to be tracked
+!.env.example
 
 # vercel
 .vercel
@@ -47,7 +49,3 @@ next-env.d.ts
 
 # OS generated files
 Thumbs.db
-
-# Custom files to ignore
-/lib/token-detection.ts
-/lib/price-service.ts

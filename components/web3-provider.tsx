@@ -6,7 +6,7 @@ import type React from "react"
 
 const CDP_CONFIG = {
   projectId: process.env.NEXT_PUBLIC_CDP_PROJECT_ID ?? "",
-  createAccountOnLogin: "evm-smart" as const,
+  createAccountOnLogin: "evm-eoa" as const,
   debugging: process.env.NODE_ENV === "development",
 }
 

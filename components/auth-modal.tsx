@@ -112,10 +112,10 @@ export function AuthModal({
         )}
         {isSignedIn && currentUser && (
           <div className="text-center space-y-2">
-            <p className="text-sm text-[#718096]">Smart Account Active</p>
-            {currentUser.evmSmartAccounts?.[0] && (
+            <p className="text-sm text-[#718096]">Wallet Connected</p>
+            {currentUser.evmAccounts?.[0] && (
               <p className="text-xs font-mono text-[#718096]">
-                {currentUser.evmSmartAccounts[0].slice(0, 8)}...{currentUser.evmSmartAccounts[0].slice(-6)}
+                {currentUser.evmAccounts[0].slice(0, 8)}...{currentUser.evmAccounts[0].slice(-6)}
               </p>
             )}
           </div>

@@ -21,8 +21,8 @@ export default function CryptoTipLanding() {
   const backwardVideoRef = useRef<HTMLVideoElement>(null)
   const [isPlayingBackward, setIsPlayingBackward] = useState(false)
 
-  // Use Smart Account address for user operations
-  const address = currentUser?.evmSmartAccounts?.[0] || evmAddress
+  // Use EOA address for user operations
+  const address = currentUser?.evmAccounts?.[0] || evmAddress
   const effectiveConnected = isSignedIn || isConnected
 
   useEffect(() => {
@@ -216,7 +216,7 @@ export default function CryptoTipLanding() {
                 />
               </div>
               <h3 className="text-2xl font-bold text-black mb-3">Stablecoin</h3>
-              <p className="text-lg text-[#6b7280] font-medium">The tips you receive in USDC are equal in value to USD and don't fluctuate in value</p>
+              <p className="text-lg text-[#6b7280] font-medium">The tips you receive in USDC are equal in value to USD and don&apos;t fluctuate in value</p>
             </div>
           </div>
         </div>

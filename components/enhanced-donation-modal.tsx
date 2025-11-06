@@ -1,11 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useCurrentUser, useSendUserOperation, useIsSignedIn } from "@coinbase/cdp-hooks"
+import { useCurrentUser, useIsSignedIn } from "@coinbase/cdp-hooks"
+import { getCurrentUser, toViemAccount } from "@coinbase/cdp-core"
 import { useBalance } from "wagmi"
-import { base } from "viem/chains"
-import { formatUnits, type Address } from "viem"
-import { prepareUSDCTransferCall, getCDPNetworkName, USDC_BASE_ADDRESS, USDC_DECIMALS } from "@/lib/cdp-utils"
+import { baseSepolia } from "viem/chains"
+import { formatUnits, type Address, createWalletClient, http, publicActions } from "viem"
+import { USDC_BASE_ADDRESS, USDC_DECIMALS } from "@/lib/cdp-utils"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -35,6 +36,7 @@ interface EnhancedDonationModalProps {
   recipientAddress: string
   recipientName?: string
   recipientAvatar?: string
+  recipientSlug: string
 }
 
 export function EnhancedDonationModal({
@@ -43,28 +45,31 @@ export function EnhancedDonationModal({
   recipientAddress,
   recipientName = "Creator",
   recipientAvatar,
+  recipientSlug,
 }: EnhancedDonationModalProps) {
   const { currentUser } = useCurrentUser()
   const { isSignedIn } = useIsSignedIn()
-  const { sendUserOperation, status, data, error } = useSendUserOperation()
   const { toast } = useToast()
 
   const [amount, setAmount] = useState("")
   const [message, setMessage] = useState("")
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const smartAccount = currentUser?.evmSmartAccounts?.[0]
+  const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle")
+  const [error, setError] = useState<Error | null>(null)
+  const [txHash, setTxHash] = useState<string | null>(null)
+  const eoaAccount = currentUser?.evmAccounts?.[0]
 
   const { data: usdcBalance, refetch: refetchBalance } = useBalance({
-    address: smartAccount as Address,
+    address: eoaAccount as Address,
     token: USDC_BASE_ADDRESS,
-    chainId: base.id,
+    chainId: baseSepolia.id,
   })
 
   useEffect(() => {
-    if (smartAccount) {
+    if (eoaAccount) {
       refetchBalance()
     }
-  }, [smartAccount, refetchBalance])
+  }, [eoaAccount, refetchBalance])
 
   useEffect(() => {
     if (status === "success") {
@@ -77,7 +82,7 @@ export function EnhancedDonationModal({
   }, [status, onClose])
 
   const handleDonate = async () => {
-    if (!smartAccount || !amount || !recipientAddress) {
+    if (!eoaAccount || !amount || !recipientAddress) {
       toast({
         title: "Error",
         description: "Please enter an amount",
@@ -107,44 +112,71 @@ export function EnhancedDonationModal({
     }
 
     try {
-      // Prepare USDC transfer call using our utility function
-      const transferCall = prepareUSDCTransferCall(recipientAddress, amount)
+      setStatus("pending")
+      setError(null)
 
-      const result = await sendUserOperation({
-        evmSmartAccount: smartAccount,
-        network: getCDPNetworkName(),
-        calls: [transferCall],
-        useCdpPaymaster: true, // Enable gas sponsorship
+      // Import x402-fetch
+      const { wrapFetchWithPayment } = await import("x402-fetch")
+
+      // Create viem client from CDP embedded wallet
+      const user = await getCurrentUser()
+      if (!user || !user.evmAccounts || user.evmAccounts.length === 0) {
+        throw new Error("No wallet account found")
+      }
+
+      const viemAccount = await toViemAccount(user.evmAccounts[0])
+      const chain = baseSepolia
+      const rpcUrl = 'https://sepolia.base.org'
+
+      const viemClient = createWalletClient({
+        account: viemAccount,
+        chain: chain,
+        transport: http(rpcUrl),
+      }).extend(publicActions)
+
+      // Create wrapped fetch with x402 payment handling
+      // Max payment: $1000 USDC (safety limit)
+      const fetchWithPayment = wrapFetchWithPayment(
+        fetch,
+        viemClient as any, // eslint-disable-line @typescript-eslint/no-explicit-any -- viem client types are compatible but complex
+        BigInt(1000 * 10 ** USDC_DECIMALS)
+      ) as typeof fetch
+
+      // Make request with x402 payment handling
+      const response = await fetchWithPayment("/api/send-tip", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          recipientSlug,
+          amount,
+          message,
+          senderAddress: eoaAccount,
+        }),
       })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || "Payment failed")
+      }
+
+      const result = await response.json()
+
+      setStatus("success")
+      setTxHash(result.donation?.id || "success")
 
       toast({
         title: "Donation Sent! 🎉",
         description: `${amount} USDC sent to ${recipientName}`,
       })
 
-      try {
-        await fetch("/api/save-donation", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            from: smartAccount,
-            to: recipientAddress,
-            amount,
-            token: "USDC",
-            chain: "base",
-            txHash: result.userOperationHash,
-            message,
-            gasSponsored: true,
-          }),
-        })
-      } catch (saveError) {
-        console.error("Failed to save donation:", saveError)
-      }
-
       refetchBalance()
     } catch (err) {
       console.error("Donation error:", err)
       const errorMessage = err instanceof Error ? err.message : "Transaction failed"
+      setStatus("error")
+      setError(err instanceof Error ? err : new Error(errorMessage))
       toast({
         title: "Donation Failed",
         description: errorMessage,
@@ -216,7 +248,7 @@ export function EnhancedDonationModal({
                   <div className="bg-gray-50 p-3 rounded-lg">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs text-gray-600 mb-1">Your USDC Balance (Base)</p>
+                        <p className="text-xs text-gray-600 mb-1">Your USDC Balance (Base Sepolia)</p>
                         <p className="text-lg font-bold text-gray-900">
                           {parseFloat(formatUnits(usdcBalance.value, USDC_DECIMALS)).toFixed(2)} USDC
                         </p>
@@ -235,7 +267,7 @@ export function EnhancedDonationModal({
                             <DrawerTitle className="text-xl font-bold text-gray-900">Deposit USDC</DrawerTitle>
                           </DrawerHeader>
                           <div className="p-6 space-y-6">
-                            {smartAccount && (
+                            {eoaAccount && (
                               <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
                                 <Fund
                                   country="US"
@@ -244,7 +276,7 @@ export function EnhancedDonationModal({
                                   fiatCurrency="USD"
                                   fetchBuyQuote={createBuyQuote}
                                   fetchBuyOptions={getBuyOptions}
-                                  network="base"
+                                  network="base-sepolia"
                                   onSuccess={handleFundSuccess}
                                 />
                               </div>
@@ -332,11 +364,11 @@ export function EnhancedDonationModal({
                 </div>
               )}
 
-              {status === "success" && data && (
+              {status === "success" && txHash && (
                 <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
                   <p className="text-sm font-medium text-green-900 mb-1">✅ Donation Successful!</p>
-                  <p className="text-xs text-green-700 font-mono break-all">
-                    Tx: {data.userOpHash?.slice(0, 10)}...{data.userOpHash?.slice(-8)}
+                  <p className="text-xs text-green-700">
+                    Payment processed via x402 (gas-less)
                   </p>
                 </div>
               )}

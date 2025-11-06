@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useAccount } from "wagmi"
-import { useIsSignedIn, useEvmAddress, useSignOut } from "@coinbase/cdp-hooks"
+import { useIsSignedIn, useEvmAddress, useSignOut, useCurrentUser } from "@coinbase/cdp-hooks"
 import { Button } from "@/components/ui/button"
 import { User, Settings, LogOut, Shield, ExternalLink, Copy, Check } from "lucide-react"
 import { Snout } from "@/components/ui/snout"
@@ -31,14 +31,16 @@ export function Header({ className = "" }: HeaderProps) {
   const [mounted, setMounted] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [isCopied, setIsCopied] = useState(false)
+  const [isWalletCopied, setIsWalletCopied] = useState(false)
   const [isScrolledToWhite, setIsScrolledToWhite] = useState(false)
   const { address, isConnected } = useAccount()
   const { isSignedIn } = useIsSignedIn()
   const { evmAddress } = useEvmAddress()
+  const { currentUser } = useCurrentUser()
   const { signOut } = useSignOut()
   const pathname = usePathname()
 
-  const effectiveAddress = evmAddress || address
+  const effectiveAddress = currentUser?.evmAccounts?.[0] || address || evmAddress
   const effectiveConnected = isSignedIn || isConnected
 
   useEffect(() => {
@@ -108,6 +110,23 @@ export function Header({ className = "" }: HeaderProps) {
       }, 2000)
     } catch (error) {
       console.error('Failed to copy:', error)
+    }
+  }
+
+  const copyWalletAddress = async () => {
+    if (!effectiveAddress || typeof window === 'undefined') {
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(effectiveAddress)
+      setIsWalletCopied(true)
+
+      setTimeout(() => {
+        setIsWalletCopied(false)
+      }, 1000)
+    } catch (error) {
+      console.error('Failed to copy wallet address:', error)
     }
   }
 
@@ -245,13 +264,23 @@ export function Header({ className = "" }: HeaderProps) {
                 <span className={`text-sm font-medium transition-colors duration-300 ${
                   pathname === '/' && isScrolledToWhite ? 'text-gray-900' : 'text-white'
                 }`}>Connected</span>
-                <code className={`text-xs px-2 py-1 rounded font-mono transition-all duration-300 ${
-                  pathname === '/' && isScrolledToWhite
-                    ? 'bg-gray-200 text-gray-700'
-                    : 'bg-black/30 text-gray-300'
-                }`}>
-                  {formatAddress(effectiveAddress)}
-                </code>
+                <button
+                  onClick={copyWalletAddress}
+                  className={`text-xs px-2 py-1 rounded font-mono transition-all duration-300 cursor-pointer hover:opacity-80 ${
+                    pathname === '/' && isScrolledToWhite
+                      ? 'bg-gray-200 text-gray-700'
+                      : 'bg-black/30 text-gray-300'
+                  }`}
+                >
+                  {isWalletCopied ? (
+                    <span className="flex items-center gap-1">
+                      <Check className="h-3 w-3 text-green-400" />
+                      Copied
+                    </span>
+                  ) : (
+                    formatAddress(effectiveAddress)
+                  )}
+                </button>
               </div>
 
               <DropdownMenu>

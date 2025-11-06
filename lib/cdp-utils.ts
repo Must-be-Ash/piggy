@@ -1,7 +1,8 @@
 // CDP (Coinbase Developer Platform) utilities for PiggyBanks
 import { parseUnits, encodeFunctionData } from 'viem'
 
-export const USDC_BASE_ADDRESS = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+// Base Sepolia testnet USDC address
+export const USDC_BASE_ADDRESS = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
 export const USDC_DECIMALS = 6
 
 export interface SmartAccountCall {
@@ -10,7 +11,7 @@ export interface SmartAccountCall {
   data: `0x${string}`
 }
 
-// Prepare USDC transfer call for Smart Account with gas sponsorship
+// Prepare USDC transfer call with gas sponsorship
 export function prepareUSDCTransferCall(
   recipientAddress: string,
   amount: string
@@ -42,9 +43,9 @@ export function prepareUSDCTransferCall(
   }
 }
 
-// Get network name for CDP (Base mainnet vs testnet)
+// Get network name for CDP (Base Sepolia testnet)
 export function getCDPNetworkName(): 'base' | 'base-sepolia' {
-  return process.env.NODE_ENV === 'development' ? 'base-sepolia' : 'base'
+  return 'base-sepolia'
 }
 
 export function formatAddress(address: string): string {

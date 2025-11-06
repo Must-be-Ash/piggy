@@ -19,8 +19,8 @@ export default function AuthPage() {
   const { currentUser } = useCurrentUser()
   const router = useRouter()
 
-  // Use Smart Account address for user operations
-  const address = currentUser?.evmSmartAccounts?.[0] || evmAddress
+  // Use EOA address for user operations
+  const address = currentUser?.evmAccounts?.[0] || evmAddress
   const isConnected = isSignedIn
 
   useEffect(() => {

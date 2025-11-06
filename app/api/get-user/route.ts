@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import connectDB from '@/lib/mongodb'
 import User from '@/lib/models/User'
+import { validateCDPAuth, extractEvmAddressesFromCDPUser } from '@/lib/cdp-auth'
 
 // GET /api/get-user?address=... or /api/get-user?slug=... - Get user by address or slug
 export async function GET(request: NextRequest) {
@@ -64,26 +65,36 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // SECURITY: Verify wallet ownership before allowing updates
-    const { verifyWalletOwnership } = await import('@/lib/auth-middleware')
-    const authResult = await verifyWalletOwnership(request, address)
-    
-    if (!authResult.isValid) {
+    // SECURITY: Verify CDP authentication and wallet ownership
+    const authResult = await validateCDPAuth(request)
+
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
-        { error: authResult.error || 'Unauthorized' },
-        { status: 401 }
+        { error: authResult.error || 'Authentication failed' },
+        { status: authResult.status }
+      )
+    }
+
+    // Verify the authenticated user owns the address being modified
+    const userAddresses = extractEvmAddressesFromCDPUser(authResult.user)
+    if (!userAddresses.some(addr => addr.toLowerCase() === address.toLowerCase())) {
+      return NextResponse.json(
+        { error: 'You can only update your own profile' },
+        { status: 403 }
       )
     }
     
     // Fields that can be updated
-    const allowedUpdates = ['displayName', 'bio', 'avatar', 'twitter', 'farcaster', 'github', 'website', 'preferredCurrency', 'minDonationAmount']
+    const allowedUpdates = ['displayName', 'bio', 'avatar', 'twitter', 'farcaster', 'github', 'linkedin', 'website', 'preferredCurrency', 'minDonationAmount']
     const updates: Record<string, unknown> = {}
     
     // Filter and validate updates
     for (const [key, value] of Object.entries(body)) {
       if (allowedUpdates.includes(key)) {
         if (typeof value === 'string') {
-          updates[key] = value.trim()
+          const trimmed = value.trim()
+          // Convert empty strings to null for optional fields
+          updates[key] = trimmed === '' ? null : trimmed
         } else {
           updates[key] = value
         }
@@ -138,11 +149,32 @@ export async function PUT(request: NextRequest) {
       )
     }
     
-    const user = await User.findOneAndUpdate(
-      { address: address.toLowerCase(), isActive: true },
-      { $set: updates },
-      { new: true, runValidators: true }
-    ).select('-__v')
+    // Try to update with explicit linkedin field handling
+    let user
+    try {
+      // First, try the normal update
+      user = await User.findOneAndUpdate(
+        { address: address.toLowerCase(), isActive: true },
+        { $set: updates },
+        { new: true, runValidators: true, upsert: false }
+      ).select('-__v')
+      
+      // If linkedin is still undefined after update, try a direct update
+      if (user && 'linkedin' in updates && (user.linkedin === undefined || user.linkedin === null)) {
+        await User.updateOne(
+          { address: address.toLowerCase(), isActive: true },
+          { $set: { linkedin: updates.linkedin } }
+        )
+        // Fetch the user again
+        user = await User.findOne({ 
+          address: address.toLowerCase(), 
+          isActive: true 
+        }).select('-__v')
+      }
+    } catch (updateError) {
+      console.error('Error updating user:', updateError)
+      throw updateError
+    }
     
     if (!user) {
       return NextResponse.json(
@@ -180,14 +212,22 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // SECURITY: Verify wallet ownership before allowing deletion
-    const { verifyWalletOwnership } = await import('@/lib/auth-middleware')
-    const authResult = await verifyWalletOwnership(request, address)
-    
-    if (!authResult.isValid) {
+    // SECURITY: Verify CDP authentication and wallet ownership
+    const authResult = await validateCDPAuth(request)
+
+    if (authResult.error || !authResult.user) {
       return NextResponse.json(
-        { error: authResult.error || 'Unauthorized' },
-        { status: 401 }
+        { error: authResult.error || 'Authentication failed' },
+        { status: authResult.status }
+      )
+    }
+
+    // Verify the authenticated user owns the address being deleted
+    const userAddresses = extractEvmAddressesFromCDPUser(authResult.user)
+    if (!userAddresses.some(addr => addr.toLowerCase() === address.toLowerCase())) {
+      return NextResponse.json(
+        { error: 'You can only delete your own account' },
+        { status: 403 }
       )
     }
     

@@ -10,6 +10,7 @@ interface DonationRecipient {
   displayName: string
   avatar?: string
   address: string
+  slug: string
 }
 
 interface DonateButtonProps {
@@ -92,6 +93,7 @@ export function DonateButton({
           recipientAddress={recipient.address}
           recipientName={recipient.displayName}
           recipientAvatar={recipient.avatar}
+          recipientSlug={recipient.slug}
         />
       )}
     </>

@@ -38,8 +38,8 @@ export default function DashboardPage() {
   const { signOut } = useSignOut()
   const router = useRouter()
 
-  // Use Smart Account address for user operations
-  const effectiveAddress = currentUser?.evmSmartAccounts?.[0] || evmAddress
+  // Use EOA address for user operations
+  const effectiveAddress = currentUser?.evmAccounts?.[0] || evmAddress
   const effectiveConnected = isSignedIn
 
   useEffect(() => {

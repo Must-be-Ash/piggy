@@ -1,13 +1,12 @@
 "use client"
 
-import { useConfig } from 'wagmi'
+import { useGetAccessToken } from '@coinbase/cdp-hooks'
 import { useToast } from './use-toast'
-import { authenticatedFetch } from '@/lib/wallet-auth'
 import { useState, useEffect } from 'react'
 
-export function useAuthenticatedApi() {
+export function useCdpAuthenticatedApi() {
   const [mounted, setMounted] = useState(false)
-  const wagmiConfig = useConfig()
+  const { getAccessToken } = useGetAccessToken()
   const { toast } = useToast()
 
   useEffect(() => {
@@ -20,14 +19,21 @@ export function useAuthenticatedApi() {
     }
 
     try {
-      const response = await authenticatedFetch(
-        `/api/get-user?address=${address}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(updateData),
+      // Get CDP access token
+      const accessToken = await getAccessToken()
+
+      if (!accessToken) {
+        throw new Error('Not authenticated - please sign in')
+      }
+
+      const response = await fetch(`/api/get-user?address=${address}`, {
+        method: "PUT",
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
-        wagmiConfig
-      )
+        body: JSON.stringify(updateData),
+      })
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -37,14 +43,14 @@ export function useAuthenticatedApi() {
       return await response.json()
     } catch (error: any) {
       console.error('Update user error:', error)
-      
+
       // Show user-friendly error message
       toast({
         title: "Update Failed",
         description: error.message || "Failed to update your profile. Please try again.",
         variant: "destructive",
       })
-      
+
       throw error
     }
   }
@@ -55,13 +61,20 @@ export function useAuthenticatedApi() {
     }
 
     try {
-      const response = await authenticatedFetch(
-        `/api/get-user?address=${address}`,
-        {
-          method: "DELETE",
+      // Get CDP access token
+      const accessToken = await getAccessToken()
+
+      if (!accessToken) {
+        throw new Error('Not authenticated - please sign in')
+      }
+
+      const response = await fetch(`/api/get-user?address=${address}`, {
+        method: "DELETE",
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
         },
-        wagmiConfig
-      )
+      })
 
       if (!response.ok) {
         const errorData = await response.json()
@@ -71,14 +84,14 @@ export function useAuthenticatedApi() {
       return await response.json()
     } catch (error: any) {
       console.error('Delete user error:', error)
-      
+
       // Show user-friendly error message
       toast({
         title: "Deletion Failed",
         description: error.message || "Failed to delete your account. Please try again.",
         variant: "destructive",
       })
-      
+
       throw error
     }
   }
@@ -87,4 +100,4 @@ export function useAuthenticatedApi() {
     updateUser,
     deleteUser,
   }
-} 
+}

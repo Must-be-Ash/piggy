@@ -7,6 +7,7 @@ import { Shield, User } from "lucide-react"
 import { FaXTwitter } from "react-icons/fa6"
 // import { Snout } from "@/components/ui/snout"
 import { SiFarcaster } from "react-icons/si"
+import { FaGithub, FaLinkedin, FaGlobe } from "react-icons/fa"
 import { useAccount } from "wagmi"
 import { Header } from "@/components/header"
 import { DonateButton } from "@/components/donate-button"
@@ -23,6 +24,9 @@ interface User {
   createdAt: string
   twitter?: string
   farcaster?: string
+  github?: string
+  linkedin?: string
+  website?: string
 }
 
 interface DonationPageProps {
@@ -119,7 +123,7 @@ function DonationPageContent({ user }: DonationPageProps) {
               {/* Social Links */}
               {!mounted || !isOwnPage ? (
                 /* Show social links for visitors */
-                (user.twitter || user.farcaster) && (
+                (user.twitter || user.farcaster || user.github || user.linkedin || user.website) && (
                   <div className="flex items-center justify-center gap-3 py-1">
                     {user.twitter && (
                       <div className="modern-auth-button-small">
@@ -141,6 +145,36 @@ function DonationPageContent({ user }: DonationPageProps) {
                         </button>
                       </div>
                     )}
+                    {user.github && (
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.github, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <FaGithub className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
+                    )}
+                    {user.linkedin && (
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.linkedin, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <FaLinkedin className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
+                    )}
+                    {user.website && (
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.website, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <FaGlobe className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )
               ) : null}
@@ -154,7 +188,8 @@ function DonationPageContent({ user }: DonationPageProps) {
                       recipient={{
                         displayName: user.displayName,
                         avatar: user.avatar,
-                        address: user.address
+                        address: user.address,
+                        slug: user.slug
                       }}
                       variant="heart"
                       size="lg"
@@ -302,7 +337,7 @@ export function DonationPage({ user }: DonationPageProps) {
                 </div>
 
                 {/* Social Links */}
-                {(user.twitter || user.farcaster) && (
+                {(user.twitter || user.farcaster || user.github || user.linkedin || user.website) && (
                   <div className="flex items-center justify-center gap-3 py-2">
                     {user.twitter && (
                       <div className="modern-auth-button-small">
@@ -324,6 +359,36 @@ export function DonationPage({ user }: DonationPageProps) {
                         </button>
                       </div>
                     )}
+                    {user.github && (
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.github, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <FaGithub className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
+                    )}
+                    {user.linkedin && (
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.linkedin, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <FaLinkedin className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
+                    )}
+                    {user.website && (
+                      <div className="modern-auth-button-small">
+                        <button
+                          onClick={() => window.open(user.website, "_blank")}
+                          className="w-12 h-12 flex items-center justify-center"
+                        >
+                          <FaGlobe className="h-4 w-4 text-current" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -334,7 +399,8 @@ export function DonationPage({ user }: DonationPageProps) {
                       recipient={{
                         displayName: user.displayName,
                         avatar: user.avatar,
-                        address: user.address
+                        address: user.address,
+                        slug: user.slug
                       }}
                       variant="heart"
                       size="lg"

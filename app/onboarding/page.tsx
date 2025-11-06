@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Header } from "@/components/header"
 import { LoadingState } from "@/components/loading-state"
 import { AvatarUpload } from "@/components/avatar-upload"
-import { useAuthenticatedApi } from "@/hooks/use-authenticated-api"
+import { useCdpAuthenticatedApi } from "@/hooks/use-cdp-authenticated-api"
 
 // Force dynamic rendering to prevent SSG issues with wagmi
 export const dynamic = 'force-dynamic'
@@ -27,6 +27,9 @@ export default function OnboardingPage() {
   const [avatar, setAvatar] = useState<string | null>(null)
   const [twitter, setTwitter] = useState("")
   const [farcaster, setFarcaster] = useState("")
+  const [github, setGithub] = useState("")
+  const [linkedin, setLinkedin] = useState("")
+  const [website, setWebsite] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [pageLoading, setPageLoading] = useState(true)
@@ -40,12 +43,12 @@ export default function OnboardingPage() {
   const { evmAddress } = useEvmAddress()
   const { currentUser } = useCurrentUser()
 
-  // Use Smart Account address for user operations
-  const address = currentUser?.evmSmartAccounts?.[0] || evmAddress
+  // Use EOA address for user operations
+  const address = currentUser?.evmAccounts?.[0] || evmAddress
   const isConnected = isSignedIn
   const router = useRouter()
   const { toast } = useToast()
-  const { updateUser } = useAuthenticatedApi()
+  const { updateUser } = useCdpAuthenticatedApi()
 
   const generateSlug = (name: string, address: string) => {
     if (name && name.trim()) {
@@ -85,6 +88,9 @@ export default function OnboardingPage() {
           setAvatar(user.avatar || null)
           setTwitter(user.twitter || "")
           setFarcaster(user.farcaster || "")
+          setGithub(user.github || "")
+          setLinkedin(user.linkedin || "")
+          setWebsite(user.website || "")
           setIsEditing(true)
         }
       } catch (error) {
@@ -185,10 +191,13 @@ export default function OnboardingPage() {
         // User exists, update them - use authenticated API
         const updateData = {
           displayName: displayName.trim(),
-          bio: bio.trim(),
-          avatar: avatar,
-          twitter: twitter.trim(),
-          farcaster: farcaster.trim(),
+          bio: bio.trim() || null,
+          avatar: avatar || null,
+          twitter: twitter.trim() || null,
+          farcaster: farcaster.trim() || null,
+          github: github.trim() || null,
+          linkedin: linkedin.trim() || null,
+          website: website.trim() || null,
         }
         
         const result = await updateUser(address, updateData)
@@ -208,6 +217,9 @@ export default function OnboardingPage() {
             avatar: avatar,
             twitter: twitter.trim(),
             farcaster: farcaster.trim(),
+            github: github.trim(),
+            linkedin: linkedin.trim(),
+            website: website.trim(),
             slug,
           }),
         })
@@ -373,6 +385,51 @@ export default function OnboardingPage() {
                               placeholder="https://warpcast.com/yourusername"
                               value={farcaster}
                               onChange={(e) => setFarcaster(e.target.value)}
+                              type="url"
+                              className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
+                            />
+                            
+                          </div>
+
+                          <div className="space-y-3">
+                            <Label htmlFor="github" className="text-base font-semibold text-[#1a202c]">
+                              GitHub Profile URL
+                            </Label>
+                            <Input
+                              id="github"
+                              placeholder="https://github.com/yourusername"
+                              value={github}
+                              onChange={(e) => setGithub(e.target.value)}
+                              type="url"
+                              className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
+                            />
+                            
+                          </div>
+
+                          <div className="space-y-3">
+                            <Label htmlFor="linkedin" className="text-base font-semibold text-[#1a202c]">
+                              LinkedIn Profile URL
+                            </Label>
+                            <Input
+                              id="linkedin"
+                              placeholder="https://linkedin.com/in/yourusername"
+                              value={linkedin}
+                              onChange={(e) => setLinkedin(e.target.value)}
+                              type="url"
+                              className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
+                            />
+                            
+                          </div>
+
+                          <div className="space-y-3">
+                            <Label htmlFor="website" className="text-base font-semibold text-[#1a202c]">
+                              Website URL
+                            </Label>
+                            <Input
+                              id="website"
+                              placeholder="https://yourwebsite.com"
+                              value={website}
+                              onChange={(e) => setWebsite(e.target.value)}
                               type="url"
                               className="h-12 text-base border-2 border-[#e2e8f0] focus:border-[#2d3748] rounded-xl"
                             />

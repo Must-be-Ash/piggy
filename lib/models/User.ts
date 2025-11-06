@@ -14,6 +14,7 @@ export interface IUser extends Document {
   twitter?: string
   farcaster?: string
   github?: string
+  linkedin?: string
   website?: string
   
   // Settings
@@ -74,6 +75,11 @@ const UserSchema = new Schema<IUser>({
     trim: true,
     maxlength: 100
   },
+  linkedin: {
+    type: String,
+    trim: true,
+    maxlength: 200
+  },
   website: {
     type: String,
     trim: true,
@@ -93,6 +99,7 @@ const UserSchema = new Schema<IUser>({
   }
 }, {
   timestamps: true,
+  strict: true, // Only save fields defined in schema
   toJSON: {
     transform: function(doc, ret) {
       ret.id = ret._id

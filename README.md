@@ -1,6 +1,6 @@
 # PiggyBanks
 
-A gas-less crypto donation platform built with Next.js, Coinbase Developer Platform (CDP), and MongoDB. Send USDC tips instantly without gas fees using x402 payment protocol.
+A LinkTree type platform that also has gas-less crypto donation/tipping available. Built with Coinbase Developer Platform's Embedded Wallet, Onramp and x402 protocol.
 
 ## Features
 
@@ -176,6 +176,11 @@ npm run test:build       # Test production build locally
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+## Resources
+
+- **Coinbase Developer Platform**: [Get your API keys](https://portal.cdp.coinbase.com/)
+- **x402 Protocol**: [Learn more about gas-less payments](https://x402.org)
 
 ## License
 

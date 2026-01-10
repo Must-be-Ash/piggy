@@ -3,7 +3,6 @@
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
-import { useAccount } from "wagmi"
 import { useIsSignedIn, useEvmAddress, useCurrentUser } from "@coinbase/cdp-hooks"
 import { useState, useEffect, useRef } from "react"
 
@@ -12,7 +11,6 @@ import { GlassmorphicButton } from "@/components/ui/glassmorphic-button"
 
 export default function CryptoTipLanding() {
   const router = useRouter()
-  const { isConnected } = useAccount()
   const { isSignedIn } = useIsSignedIn()
   const { evmAddress } = useEvmAddress()
   const { currentUser } = useCurrentUser()
@@ -23,7 +21,7 @@ export default function CryptoTipLanding() {
 
   // Use EOA address for user operations
   const address = currentUser?.evmAccounts?.[0] || evmAddress
-  const effectiveConnected = isSignedIn || isConnected
+  const effectiveConnected = isSignedIn
 
   useEffect(() => {
     setMounted(true)

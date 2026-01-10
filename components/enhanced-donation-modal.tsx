@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react"
 import { useCurrentUser, useIsSignedIn } from "@coinbase/cdp-hooks"
 import { getCurrentUser, toViemAccount } from "@coinbase/cdp-core"
-import { useBalance } from "wagmi"
+import { useReadContracts } from "wagmi"
 import { baseSepolia } from "viem/chains"
-import { formatUnits, type Address, createWalletClient, http, publicActions } from "viem"
+import { formatUnits, type Address, createWalletClient, http, publicActions, erc20Abi } from "viem"
 import { USDC_BASE_ADDRESS, USDC_DECIMALS } from "@/lib/cdp-utils"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -59,11 +59,42 @@ export function EnhancedDonationModal({
   const [txHash, setTxHash] = useState<string | null>(null)
   const eoaAccount = currentUser?.evmAccounts?.[0]
 
-  const { data: usdcBalance, refetch: refetchBalance } = useBalance({
-    address: eoaAccount as Address,
-    token: USDC_BASE_ADDRESS,
-    chainId: baseSepolia.id,
+  const { data: tokenData, refetch: refetchBalance } = useReadContracts({
+    contracts: [
+      {
+        address: USDC_BASE_ADDRESS,
+        abi: erc20Abi,
+        functionName: 'balanceOf',
+        args: [eoaAccount as Address],
+        chainId: baseSepolia.id,
+      },
+      {
+        address: USDC_BASE_ADDRESS,
+        abi: erc20Abi,
+        functionName: 'decimals',
+        chainId: baseSepolia.id,
+      },
+      {
+        address: USDC_BASE_ADDRESS,
+        abi: erc20Abi,
+        functionName: 'symbol',
+        chainId: baseSepolia.id,
+      },
+    ],
+    query: {
+      enabled: !!eoaAccount,
+    },
   })
+
+  // Transform the data to match the old useBalance format
+  const usdcBalance = tokenData ? {
+    decimals: (tokenData[1]?.result as number) || USDC_DECIMALS,
+    formatted: tokenData[0]?.result
+      ? formatUnits(tokenData[0].result as bigint, (tokenData[1]?.result as number) || USDC_DECIMALS)
+      : '0',
+    symbol: (tokenData[2]?.result as string) || 'USDC',
+    value: (tokenData[0]?.result as bigint) || BigInt(0),
+  } : undefined
 
   useEffect(() => {
     if (eoaAccount) {

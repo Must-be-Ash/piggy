@@ -2,13 +2,15 @@
 
 // import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useAccount } from "wagmi"
+import { useIsSignedIn, useEvmAddress, useCurrentUser } from "@coinbase/cdp-hooks"
 import { useState, useEffect } from "react"
 import { useMiniKit } from "@coinbase/onchainkit/minikit"
 
 export function Footer() {
   const pathname = usePathname()
-  const { address } = useAccount()
+  const { evmAddress } = useEvmAddress()
+  const { currentUser } = useCurrentUser()
+  const address = currentUser?.evmAccounts?.[0] || evmAddress
   const [mounted, setMounted] = useState(false)
   const { context } = useMiniKit()
 

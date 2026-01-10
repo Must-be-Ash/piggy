@@ -8,7 +8,7 @@ import { FaXTwitter } from "react-icons/fa6"
 // import { Snout } from "@/components/ui/snout"
 import { SiFarcaster } from "react-icons/si"
 import { FaGithub, FaLinkedin, FaGlobe } from "react-icons/fa"
-import { useAccount } from "wagmi"
+import { useEvmAddress, useCurrentUser } from "@coinbase/cdp-hooks"
 import { Header } from "@/components/header"
 import { DonateButton } from "@/components/donate-button"
 import { CopyLinkButton, ShareButton } from "@/components/copy-link-button"
@@ -34,7 +34,9 @@ interface DonationPageProps {
 }
 
 function DonationPageContent({ user }: DonationPageProps) {
-  const { address } = useAccount()
+  const { evmAddress } = useEvmAddress()
+  const { currentUser } = useCurrentUser()
+  const address = currentUser?.evmAccounts?.[0] || evmAddress
   const [isOwnPage, setIsOwnPage] = useState(false)
   const [pageUrl, setPageUrl] = useState('')
   const [mounted, setMounted] = useState(false)

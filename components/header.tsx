@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAccount } from "wagmi"
 import { useIsSignedIn, useEvmAddress, useSignOut, useCurrentUser } from "@coinbase/cdp-hooks"
 import { Button } from "@/components/ui/button"
 import { User, Settings, LogOut, Shield, ExternalLink, Copy, Check } from "lucide-react"
@@ -33,15 +32,14 @@ export function Header({ className = "" }: HeaderProps) {
   const [isCopied, setIsCopied] = useState(false)
   const [isWalletCopied, setIsWalletCopied] = useState(false)
   const [isScrolledToWhite, setIsScrolledToWhite] = useState(false)
-  const { address, isConnected } = useAccount()
   const { isSignedIn } = useIsSignedIn()
   const { evmAddress } = useEvmAddress()
   const { currentUser } = useCurrentUser()
   const { signOut } = useSignOut()
   const pathname = usePathname()
 
-  const effectiveAddress = currentUser?.evmAccounts?.[0] || address || evmAddress
-  const effectiveConnected = isSignedIn || isConnected
+  const effectiveAddress = currentUser?.evmAccounts?.[0] || evmAddress
+  const effectiveConnected = isSignedIn
 
   useEffect(() => {
     setMounted(true)

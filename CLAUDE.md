@@ -68,11 +68,11 @@ The app uses x402 protocol for gas-less USDC payments on Base Sepolia:
 1. User selects recipient via slug lookup (`/u/[slug]`)
 2. User enters USDC amount in donation modal
 3. Client creates viem wallet client from CDP embedded wallet
-4. Payment wrapped with `wrapFetchWithPayment` from x402-fetch
+4. Payment wrapped with `wrapFetchWithPayment` from @x402/fetch (x402 v2)
 5. API request triggers x402 flow:
    - First call returns 402 with payment requirements
-   - x402-fetch automatically signs EIP-3009 payment authorization
-   - Retry with X-PAYMENT header
+   - @x402/fetch automatically signs EIP-3009 payment authorization
+   - Retry with PAYMENT-SIGNATURE header (x402 v2)
    - Server verifies payment with CDP facilitator
    - Server settles payment on-chain (collects USDC before processing)
    - Donation saved to MongoDB

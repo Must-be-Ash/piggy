@@ -5,7 +5,7 @@ import { useCurrentUser, useIsSignedIn } from "@coinbase/cdp-hooks"
 import { getCurrentUser, toViemAccount } from "@coinbase/cdp-core"
 import { useReadContracts } from "wagmi"
 import { baseSepolia } from "viem/chains"
-import { formatUnits, type Address, createWalletClient, http, publicActions, erc20Abi } from "viem"
+import { formatUnits, type Address, createPublicClient, http, erc20Abi } from "viem"
 import { USDC_BASE_ADDRESS, USDC_DECIMALS } from "@/lib/cdp-utils"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -146,32 +146,34 @@ export function EnhancedDonationModal({
       setStatus("pending")
       setError(null)
 
-      // Import x402-fetch
-      const { wrapFetchWithPayment } = await import("x402-fetch")
+      // Import x402 v2 client packages
+      const { wrapFetchWithPayment, x402Client } = await import("@x402/fetch")
+      const { ExactEvmScheme, toClientEvmSigner } = await import("@x402/evm")
 
-      // Create viem client from CDP embedded wallet
+      // Create viem signer from CDP embedded wallet
       const user = await getCurrentUser()
       if (!user || !user.evmAccounts || user.evmAccounts.length === 0) {
         throw new Error("No wallet account found")
       }
 
       const viemAccount = await toViemAccount(user.evmAccounts[0])
-      const chain = baseSepolia
-      const rpcUrl = 'https://sepolia.base.org'
-
-      const viemClient = createWalletClient({
-        account: viemAccount,
-        chain: chain,
-        transport: http(rpcUrl),
-      }).extend(publicActions)
+      const publicClient = createPublicClient({
+        chain: baseSepolia,
+        transport: http('https://sepolia.base.org'),
+      })
 
       // Create wrapped fetch with x402 payment handling
       // Max payment: $1000 USDC (safety limit)
-      const fetchWithPayment = wrapFetchWithPayment(
-        fetch,
-        viemClient as any, // eslint-disable-line @typescript-eslint/no-explicit-any -- viem client types are compatible but complex
-        BigInt(1000 * 10 ** USDC_DECIMALS)
-      ) as typeof fetch
+      const maxPayment = BigInt(1000 * 10 ** USDC_DECIMALS)
+      const client = new x402Client()
+        .register(
+          "eip155:84532",
+          new ExactEvmScheme(toClientEvmSigner(viemAccount as any, publicClient)) // eslint-disable-line @typescript-eslint/no-explicit-any -- CDP viem account types are compatible but complex
+        )
+        .registerPolicy((_version, requirements) =>
+          requirements.filter((req) => BigInt(req.amount) <= maxPayment)
+        )
+      const fetchWithPayment = wrapFetchWithPayment(fetch, client) as typeof fetch
 
       // Make request with x402 payment handling
       const response = await fetchWithPayment("/api/send-tip", {

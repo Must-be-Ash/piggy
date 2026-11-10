@@ -83,8 +83,8 @@ npm run dev
 4. **x402 Magic**:
    - Client wraps fetch request with x402 payment handler
    - Server returns 402 Payment Required with x402 specs
-   - x402-fetch automatically signs EIP-3009 payment authorization
-   - Client retries with X-PAYMENT header
+   - @x402/fetch automatically signs EIP-3009 payment authorization
+   - Client retries with PAYMENT-SIGNATURE header (x402 v2)
    - Server verifies and settles payment via CDP facilitator
    - Payment is gas-less for the user!
 5. **Confirmation**: Donation is saved to MongoDB and user receives confirmation

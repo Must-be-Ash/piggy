@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createFacilitatorConfig } from "@coinbase/x402"
-import { useFacilitator } from "x402/verify"
+import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server"
+import {
+  decodePaymentSignatureHeader,
+  encodePaymentRequiredHeader,
+  encodePaymentResponseHeader,
+} from "@x402/core/http"
+import type { PaymentPayload } from "@x402/core/types"
+import { ExactEvmScheme } from "@x402/evm/exact/server"
 import connectDB from "@/lib/mongodb"
 import User from "@/lib/models/User"
 import Donation from "@/lib/models/Donation"
@@ -18,8 +25,18 @@ const facilitator = createFacilitatorConfig(
   process.env.CDP_API_KEY_ID,
   process.env.CDP_API_KEY_SECRET
 )
-// eslint-disable-next-line react-hooks/rules-of-hooks -- useFacilitator is not a React Hook, just a regular function from x402/verify
-const { verify: verifyPayment, settle: settlePayment } = useFacilitator(facilitator)
+const NETWORK = "eip155:84532" // Base Sepolia (CAIP-2)
+const resourceServer = new x402ResourceServer(new HTTPFacilitatorClient(facilitator))
+  .register(NETWORK, new ExactEvmScheme())
+
+let initPromise: Promise<void> | null = null
+function ensureInitialized() {
+  initPromise ??= resourceServer.initialize().catch((error) => {
+    initPromise = null
+    throw error
+  })
+  return initPromise
+}
 
 // USDC contract on Base Sepolia testnet
 const USDC_BASE = USDC_BASE_ADDRESS as `0x${string}`
@@ -61,48 +78,62 @@ export async function POST(request: NextRequest) {
 
     const maxAmountRequired = (amountNum * 10 ** USDC_DECIMALS).toString()
 
-    // Define payment requirements for x402
-    const paymentRequirements = {
-      scheme: "exact" as const,
-      network: "base-sepolia" as const,
-      maxAmountRequired,
-      resource: request.url,
-      description: `Tip ${amount} USDC to ${recipient.displayName || recipientSlug}`,
-      mimeType: "application/json",
+    // Define payment requirements for x402 v2
+    await ensureInitialized()
+    const [paymentRequirements] = await resourceServer.buildPaymentRequirements({
+      scheme: "exact",
+      network: NETWORK,
+      price: {
+        amount: maxAmountRequired,
+        asset: USDC_BASE,
+        extra: { name: "USDC", version: "2" }, // Base Sepolia USDC uses FiatTokenV2_2 with version "2"
+      },
       payTo: recipientAddress,
       maxTimeoutSeconds: 60,
-      asset: USDC_BASE,
-      extra: { name: "USDC", version: "2" }  // Base Sepolia USDC uses FiatTokenV2_2 with version "2"
+    })
+    const resource = {
+      url: request.url,
+      description: `Tip ${amount} USDC to ${recipient.displayName || recipientSlug}`,
+      mimeType: "application/json",
     }
 
-    // 1. Check for payment header first
-    const paymentHeader = request.headers.get("X-PAYMENT")
+    // 1. Check for payment header first (v2 PAYMENT-SIGNATURE, legacy X-PAYMENT name also accepted)
+    const paymentHeader = request.headers.get("PAYMENT-SIGNATURE") ?? request.headers.get("X-PAYMENT")
 
     if (!paymentHeader) {
       console.log("[x402] No payment header - returning 402")
-      // Return 402 with payment requirements
-      return NextResponse.json(
-        {
-          x402Version: 1,
-          error: "X-PAYMENT header is required",
-          accepts: [paymentRequirements]
-        },
-        { status: 402 }
+      // Return 402 with payment requirements (body + PAYMENT-REQUIRED header)
+      const paymentRequired = await resourceServer.createPaymentRequiredResponse(
+        [paymentRequirements],
+        resource,
+        "PAYMENT-SIGNATURE header is required"
       )
+      return NextResponse.json(paymentRequired, {
+        status: 402,
+        headers: {
+          "PAYMENT-REQUIRED": encodePaymentRequiredHeader(paymentRequired),
+          "Access-Control-Expose-Headers": "PAYMENT-REQUIRED, PAYMENT-RESPONSE",
+        },
+      })
     }
 
     // 2. Decode and verify payment
     console.log("[x402] Decoding payment header...")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- x402 payment payload has dynamic structure, validated at runtime
-    let paymentPayload: any
+    let paymentPayload: PaymentPayload
     try {
-      const decoded = Buffer.from(paymentHeader, "base64").toString("utf-8")
-      paymentPayload = JSON.parse(decoded)
+      paymentPayload = decodePaymentSignatureHeader(paymentHeader)
       console.log("[x402] Payment payload decoded:", JSON.stringify(paymentPayload, null, 2))
     } catch (err) {
       console.error("[x402] Failed to decode payment:", err)
       return NextResponse.json(
-        { error: "Invalid X-PAYMENT header format" },
+        { error: "Invalid PAYMENT-SIGNATURE header format" },
+        { status: 402 }
+      )
+    }
+
+    if (!resourceServer.findMatchingRequirements([paymentRequirements], paymentPayload)) {
+      return NextResponse.json(
+        { error: "Payment does not match the payment requirements" },
         { status: 402 }
       )
     }
@@ -111,7 +142,7 @@ export async function POST(request: NextRequest) {
     console.log("[x402] Payment requirements:", JSON.stringify(paymentRequirements, null, 2))
 
     try {
-      const verifyResult = await verifyPayment(paymentPayload, paymentRequirements)
+      const verifyResult = await resourceServer.verifyPayment(paymentPayload, paymentRequirements)
       console.log("[x402] Verification result:", JSON.stringify(verifyResult, null, 2))
 
       if (!verifyResult.isValid) {
@@ -149,7 +180,7 @@ export async function POST(request: NextRequest) {
 
     let settlementResult
     try {
-      settlementResult = await settlePayment(paymentPayload, paymentRequirements)
+      settlementResult = await resourceServer.settlePayment(paymentPayload, paymentRequirements)
       console.log("[x402] Settlement result:", JSON.stringify(settlementResult, null, 2))
 
       if (!settlementResult.success) {
@@ -233,15 +264,8 @@ export async function POST(request: NextRequest) {
       },
       {
         headers: {
-          "X-PAYMENT-RESPONSE": Buffer.from(JSON.stringify({
-            success: true,
-            transaction: settlementResult.transaction,
-            network: settlementResult.network,
-            payer: settlementResult.payer,
-            amount: maxAmountRequired,
-            token: "USDC",
-            recipient: recipientAddress
-          })).toString("base64")
+          "PAYMENT-RESPONSE": encodePaymentResponseHeader(settlementResult),
+          "Access-Control-Expose-Headers": "PAYMENT-RESPONSE",
         }
       }
     )

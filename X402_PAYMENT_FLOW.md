@@ -9,7 +9,7 @@ This document explains exactly how we successfully implement x402 gas-less payme
 ### Components
 
 1. **Client (Frontend)**: Creates payment authorization using CDP embedded wallet
-2. **x402-fetch**: Automatically handles 402 payment flow
+2. **@x402/fetch** (x402 v2): Automatically handles 402 payment flow
 3. **API Route**: Receives payment, verifies and settles
 4. **CDP Facilitator**: Handles verification, settlement, and gas sponsorship
 5. **Base Sepolia**: Blockchain where USDC transfer executes
@@ -31,19 +31,21 @@ This document explains exactly how we successfully implement x402 gas-less payme
 
 1. User enters USDC amount
 2. Client looks up recipient by slug
-3. Client creates viem wallet client from CDP embedded wallet
-4. Client wraps fetch with `wrapFetchWithPayment` from `x402-fetch`
+3. Client creates a viem account from the CDP embedded wallet and an x402 v2 client (`ExactEvmScheme` on `eip155:84532`)
+4. Client wraps fetch with `wrapFetchWithPayment` from `@x402/fetch`
 
 ```typescript
-import { wrapFetchWithPayment } from "x402-fetch"
+import { wrapFetchWithPayment, x402Client } from "@x402/fetch"
+import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm"
 
-const walletClient = createWalletClient({
-  account: address,
-  chain: baseSepolia,
-  transport: custom(cdpWalletProvider)
-})
+const viemAccount = await toViemAccount(user.evmAccounts[0])
+const publicClient = createPublicClient({ chain: baseSepolia, transport: http() })
 
-const paymentEnabledFetch = wrapFetchWithPayment(fetch, walletClient)
+const client = new x402Client()
+  .register("eip155:84532", new ExactEvmScheme(toClientEvmSigner(viemAccount, publicClient)))
+  .registerPolicy((_version, reqs) => reqs.filter((r) => BigInt(r.amount) <= maxPayment))
+
+const paymentEnabledFetch = wrapFetchWithPayment(fetch, client)
 ```
 
 ### Step 2: Initial API Request (No Payment)
@@ -65,17 +67,20 @@ Content-Type: application/json
 ```http
 HTTP/1.1 402 Payment Required
 Content-Type: application/json
+PAYMENT-REQUIRED: BASE64_ENCODED_PAYMENT_REQUIRED (same JSON as the body)
 
 {
-  "x402Version": 1,
-  "error": "X-PAYMENT header is required",
+  "x402Version": 2,
+  "error": "PAYMENT-SIGNATURE header is required",
+  "resource": {
+    "url": "http://localhost:3000/api/send-tip",
+    "description": "Tip 1 USDC to recipient-username",
+    "mimeType": "application/json"
+  },
   "accepts": [{
     "scheme": "exact",
-    "network": "base-sepolia",
-    "maxAmountRequired": "1000000",
-    "resource": "http://localhost:3000/api/send-tip",
-    "description": "Tip 1 USDC to recipient-username",
-    "mimeType": "application/json",
+    "network": "eip155:84532",
+    "amount": "1000000",
     "payTo": "0xRECIPIENT_ADDRESS",
     "maxTimeoutSeconds": 60,
     "asset": "0x036CbD53842c5426634e7929541eC2318f3dCF7e",
@@ -84,9 +89,9 @@ Content-Type: application/json
 }
 ```
 
-### Step 3: x402-fetch Creates Payment Authorization
+### Step 3: @x402/fetch Creates Payment Authorization
 
-**Automatic process** (handled by `x402-fetch`):
+**Automatic process** (handled by `@x402/fetch` + `@x402/evm`):
 
 1. **Parses 402 response** to extract payment requirements
 2. **Generates nonce**: Random 32-byte value for EIP-3009
@@ -126,9 +131,9 @@ Content-Type: application/json
 6. **Creates payment payload**:
    ```json
    {
-     "x402Version": 1,
-     "scheme": "exact",
-     "network": "base-sepolia",
+     "x402Version": 2,
+     "resource": { "url": "http://localhost:3000/api/send-tip", "...": "..." },
+     "accepted": { "scheme": "exact", "network": "eip155:84532", "amount": "1000000", "...": "..." },
      "payload": {
        "signature": "0xSIGNATURE_BYTES",
        "authorization": {
@@ -150,7 +155,7 @@ Content-Type: application/json
 ```http
 POST /api/send-tip
 Content-Type: application/json
-X-PAYMENT: BASE64_ENCODED_PAYMENT_PAYLOAD
+PAYMENT-SIGNATURE: BASE64_ENCODED_PAYMENT_PAYLOAD
 
 {
   "recipientSlug": "recipient-username",
@@ -164,15 +169,15 @@ X-PAYMENT: BASE64_ENCODED_PAYMENT_PAYLOAD
 
 **File**: `app/api/send-tip/route.ts` (lines 102-135)
 
-1. **Decode X-PAYMENT header**:
+1. **Decode PAYMENT-SIGNATURE header** and match it to the requirements:
    ```typescript
-   const decoded = Buffer.from(paymentHeader, "base64").toString("utf-8")
-   const paymentPayload = JSON.parse(decoded)
+   const paymentPayload = decodePaymentSignatureHeader(paymentHeader)
+   resourceServer.findMatchingRequirements([paymentRequirements], paymentPayload)
    ```
 
 2. **Call CDP facilitator for verification**:
    ```typescript
-   const verifyResult = await verifyPayment(paymentPayload, paymentRequirements)
+   const verifyResult = await resourceServer.verifyPayment(paymentPayload, paymentRequirements)
    ```
 
 3. **Facilitator verifies**:
@@ -240,7 +245,7 @@ This is where the actual USDC transfer happens!
    {
      "success": true,
      "transaction": "0xTRANSACTION_HASH",
-     "network": "base-sepolia",
+     "network": "eip155:84532",
      "payer": "0xSENDER_ADDRESS"
    }
    ```
@@ -274,7 +279,7 @@ await donation.save()
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
-X-PAYMENT-RESPONSE: BASE64_ENCODED_PAYMENT_RESPONSE
+PAYMENT-RESPONSE: BASE64_ENCODED_PAYMENT_RESPONSE
 
 {
   "success": true,
@@ -286,16 +291,13 @@ X-PAYMENT-RESPONSE: BASE64_ENCODED_PAYMENT_RESPONSE
 }
 ```
 
-**X-PAYMENT-RESPONSE header** (base64 decoded):
+**PAYMENT-RESPONSE header** (base64 decoded, the facilitator settle response):
 ```json
 {
   "success": true,
   "transaction": "0xTRANSACTION_HASH",
-  "network": "base-sepolia",
-  "payer": "0xSENDER_ADDRESS",
-  "amount": "1000000",
-  "token": "USDC",
-  "recipient": "0xRECIPIENT_ADDRESS"
+  "network": "eip155:84532",
+  "payer": "0xSENDER_ADDRESS"
 }
 ```
 
@@ -307,7 +309,8 @@ X-PAYMENT-RESPONSE: BASE64_ENCODED_PAYMENT_RESPONSE
 
 ```typescript
 import { createFacilitatorConfig } from "@coinbase/x402"
-import { useFacilitator } from "x402/verify"
+import { x402ResourceServer, HTTPFacilitatorClient } from "@x402/core/server"
+import { ExactEvmScheme } from "@x402/evm/exact/server"
 
 // Validate CDP credentials
 if (!process.env.CDP_API_KEY_ID || !process.env.CDP_API_KEY_SECRET) {
@@ -320,7 +323,9 @@ const facilitator = createFacilitatorConfig(
   process.env.CDP_API_KEY_SECRET
 )
 
-const { verify: verifyPayment, settle: settlePayment } = useFacilitator(facilitator)
+const resourceServer = new x402ResourceServer(new HTTPFacilitatorClient(facilitator))
+  .register("eip155:84532", new ExactEvmScheme())
+// resourceServer.initialize() is awaited once before building requirements
 ```
 
 **Why explicit credentials?**
@@ -333,18 +338,18 @@ const { verify: verifyPayment, settle: settlePayment } = useFacilitator(facilita
 **File**: `app/api/send-tip/route.ts` (lines 64-76)
 
 ```typescript
-const paymentRequirements = {
-  scheme: "exact" as const,
-  network: "base-sepolia" as const,
-  maxAmountRequired: "1000000",  // Amount in atomic units (1 USDC = 1,000,000)
-  resource: request.url,
-  description: `Tip ${amount} USDC to ${recipient.displayName || recipientSlug}`,
-  mimeType: "application/json",
-  payTo: recipientAddress,       // Recipient's wallet address
+const [paymentRequirements] = await resourceServer.buildPaymentRequirements({
+  scheme: "exact",
+  network: "eip155:84532",         // Base Sepolia (CAIP-2)
+  price: {
+    amount: "1000000",             // Amount in atomic units (1 USDC = 1,000,000)
+    asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",  // USDC contract on Base Sepolia
+    extra: { name: "USDC", version: "2" }  // ⚠️ CRITICAL: Must match contract's EIP-712 domain
+  },
+  payTo: recipientAddress,         // Recipient's wallet address
   maxTimeoutSeconds: 60,
-  asset: "0x036CbD53842c5426634e7929541eC2318f3dCF7e",  // USDC contract on Base Sepolia
-  extra: { name: "USDC", version: "2" }  // ⚠️ CRITICAL: Must match contract's EIP-712 domain
-}
+})
+// The resource ({ url, description, mimeType }) is passed separately to createPaymentRequiredResponse
 ```
 
 ### EIP-712 Domain Parameters (CRITICAL)
@@ -486,7 +491,7 @@ function transferWithAuthorization(
 
 **Causes**:
 1. ❌ Signature doesn't match authorization → Check EIP-712 domain in client
-2. ❌ Amounts don't match → Ensure `value` matches `maxAmountRequired`
+2. ❌ Amounts don't match → Ensure `value` matches the requirement `amount`
 3. ❌ Expired authorization → Check `validBefore` timestamp
 
 ## Summary
@@ -494,7 +499,7 @@ function transferWithAuthorization(
 The x402 payment flow successfully works by:
 
 1. ✅ **Client** creates EIP-3009 authorization with correct EIP-712 domain
-2. ✅ **x402-fetch** wraps the authorization in X-PAYMENT header
+2. ✅ **@x402/fetch** wraps the authorization in the PAYMENT-SIGNATURE header
 3. ✅ **Server** verifies authorization via CDP facilitator
 4. ✅ **CDP Facilitator** settles payment on-chain with gas sponsorship
 5. ✅ **USDC Contract** validates signature and executes transfer
